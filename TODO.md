@@ -36,7 +36,7 @@
 - [ ] 12. Add code in the simulator to compute maximum execution time for any core for an application.  
       ⮕ [un-sorted]:
 
-- [ ] 13. Your program should generate the following output in each run. You can generate additional output as well.    
+- [ ] 13. The program should generate the following output in each run. You can generate additional output as well.    
 ⮕ [un-sorted]:
   - [ ] Number of read/write instructions per core
   - [ ] Total execution cycles per core
