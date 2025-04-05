@@ -17,6 +17,7 @@ enum State{
 class CacheLines{ //CacheBlock
     private:
     std::vector<int32_t> data; //Each CacheLine contains data
+    //Word size is 4 bytes
     State state;
     uint32_t tag; //Every cache line is associated with a tag
     bool valid; //For deciding if data is present in cache or not (initially false)
