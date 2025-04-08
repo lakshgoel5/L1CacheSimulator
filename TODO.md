@@ -33,5 +33,20 @@
 - [ ] 11. In each cycle, each core can execute at most one memory reference instruction.  
       ⮕ [un-sorted]:
 
-- [ ] 12. Submit the repo (without the memory traces)  
+- [ ] 12. Add code in the simulator to compute maximum execution time for any core for an application.  
+      ⮕ [un-sorted]:
+
+- [ ] 13. The program should generate the following output in each run. You can generate additional output as well.    
+⮕ [un-sorted]:
+  - [ ] Number of read/write instructions per core
+  - [ ] Total execution cycles per core
+  - [ ] Number of idle cycles per core
+  - [ ] Data cache miss rate for each core
+  - [ ] Number of cache evictions per core
+  - [ ] Number of writebacks per core
+  - [ ] Number of invalidations on the bus
+  - [ ] Amount of data traffic on the bus  
+
+
+- [ ] 14. Submit the repo (without the memory traces)  
       ⮕ [end-day]:
