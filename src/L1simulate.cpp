@@ -1,4 +1,8 @@
-
+#include "headers/Processor.hpp"
+#include "headers/Cache.hpp"
+#include "headers/Bus.hpp"
+#include "headers/utils.hpp"
+#include "headers/Memory.hpp"
 
 //expand address
 // Memory address is 32-bit. If any address is less than 32 bit, assume remaining MSB to be 0
