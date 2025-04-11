@@ -5,14 +5,11 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdint>
+#include "utils.hpp"
 
 using namespace std;
 
 // ./L1simulate -t <tracefile> -s <number of set index bits> -E <number of lines per set> -b <block size in bytes> -o <output file>
-
-enum State{
-    M, E, S, I
-};
 
 class CacheLines{ //CacheBlock
     private:

@@ -5,8 +5,8 @@
 //What MESI do on load and store
 class MESIProtocol {
     public:
-        static ProcessResult read();
-        static ProcessResult write();
+        ProcessResult read();
+        ProcessResult write();
 };
 
 #endif // MESI_HPP
