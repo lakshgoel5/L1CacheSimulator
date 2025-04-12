@@ -12,7 +12,7 @@ enum BusTransaction{
     RWITM
 };
 
-enum State{ //change name
+enum MESIState{ //change name
     M, E, S, I
 };
 

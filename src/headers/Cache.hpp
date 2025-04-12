@@ -15,7 +15,7 @@ class CacheLines{ //CacheBlock
     private:
     std::vector<int32_t> data; //Each CacheLine contains data
     //Word size is 4 bytes
-    State state;
+    MESIState state;
     uint32_t tag; //Every cache line is associated with a tag
     bool valid; //For deciding if data is present in cache or not (initially false)
     // bool dirty;
@@ -23,8 +23,8 @@ class CacheLines{ //CacheBlock
 
     public:
     CacheLines(size_t blockSize);
-    void setState(State state);
-    State getSTate();
+    void setState(MESIState state);
+    MESIState getState();
 
     void setTag(uint32_t tag);
     uint32_t getTag();

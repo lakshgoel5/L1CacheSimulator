@@ -8,11 +8,11 @@ CacheLines::CacheLines(size_t blockSize){
     lru = 0;
 }
 
-void CacheLines::setState(State state){
+void CacheLines::setState(MESIState state){
     this->state = state;
 }
 
-State CacheLines::getSTate(){
+MESIState CacheLines::getState(){
     return state;
 }
 

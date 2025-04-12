@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#define NUMCORES 4
+
 int main(int argc, char* argv[]){
     // Parse command line arguments
     if (argc != 11) { //debug
@@ -22,7 +24,7 @@ int main(int argc, char* argv[]){
     int numLines = 0;
     int blockSize = 0;
     string outputFile;
-
+    //trace file should be like ../assignment3_traces/app1
     for (int i = 1; i < argc; i++) {
         if (string(argv[i]) == "-t") {
             traceFile = argv[++i];
@@ -46,9 +48,30 @@ int main(int argc, char* argv[]){
     }
 
     size_t numSets = pow(2, setIndexBits);
-    Cache cache(numSets, numLines, blockSize);
+    vector<Processor*> processorsInWork; //Number of processors can be variable
     Bus bus(blockSize); // bandwidth is assumed to be equal to block size for simplicity
-    Processor processor(1 << setIndexBits, numLines, blockSize);
+    for(int i=0; i<NUMCORES; i++){
+        Processor processor = Processor(i, numSets, numLines, blockSize, traceFile + "_proc" + to_string(i) + ".trace");
+        bus.addProcessorToBus(&processor);
+        processorsInWork.push_back(&processor);
+    }
+
+    unsigned int clock = 0;
+    while(true){
+        bool AllDone = true;
+        for(int i=0; i<NUMCORES; i++){
+            if(processorsInWork[i]->isDone() == false){
+                AllDone = false;
+                processorsInWork[i]->cycle();
+            }
+        }
+        if(AllDone){
+            break;
+        }
+        else{
+            clock++;
+        }
+    }
 
     return 0;
 }

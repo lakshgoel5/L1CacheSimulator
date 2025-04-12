@@ -5,16 +5,18 @@
 
 class Processor {
     private:
+        int processorID;
         Cache cache;
         int numOfCycles;
         ProcessorState state;
         InstructionType instructionType;
     public:
-        Processor(size_t numSets, size_t numLines, size_t blockSize) : cache(numSets, numLines, blockSize), numOfCycles(0) {}
+        Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile);
         void cycle();
         void execute();
         void execute_free(InstructionType instructionType);
         ProcessorState getState();
+        bool isDone();
 };
 
 #endif // PROCESSOR_HPP
