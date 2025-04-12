@@ -1,7 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-enum ProcessResult{
+enum ProcessMESIResult{
     CACHE_HIT,
     CACHE_MISS
 };

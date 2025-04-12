@@ -29,17 +29,15 @@ void Processor::execute() {
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::READ_MEMORY) {
-        // stay here until num of idle cycles = num of cycles to read from memory
+        // stay here until num of idle cycles = 100
 
-        // if num of idle cycles = num of cycles to read from memory then set state to free
-        // update the cache value(don't know)
+        // if num of idle cycles = 100 then set state to free and read from memory update the cache value
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::WRITE_MEMORY) {
-        // stay here until num of idle cycles = num of cycles to read from memory
+        // stay here until num of idle cycles = 100
 
-        // if num of idle cycles = num of cycles to read from memory then set state to free
-        // update the cache value(don't know)
+        // if num of idle cycles = 100 then set state to free and write in memory update the cache value
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::DONE) {
@@ -52,9 +50,22 @@ void Processor::execute() {
 void Processor::execute_free(InstructionType instructionType) {
     if(instructionType == InstructionType::LOAD) {
         // call mesi function of load
-        // according to cachestatus of hit or miss, call the busRequest operation
+        // get result which is hit or miss(Other work done by MESI only)
+
+        //if miss, I have sent bus request to read from memory, and update cache transition to required status
+        //so no need to do anything
+
+        // if hit then set state to FREE
+        // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
     } else if(instructionType == InstructionType::STORE) {
-        // Handle store operation
+        // call mesi function of store
+        // get result which is hit or miss(Other work done by MESI only)
+
+        //if miss, I have sent bus request to read from memory, and update cache transition to required status
+        //so no need to do anything
+
+        // if hit then set state to FREE
+        // if not hit, then set state to WRITE_MEMORY, so that I can stay there for 100 cycles
     }
     
 }

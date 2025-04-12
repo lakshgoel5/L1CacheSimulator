@@ -58,6 +58,7 @@ class Cache{
 
     public:
     Cache(size_t numSets, size_t numLines, size_t blockSize);
+    MESIState getState(unsigned int address);
 };
 
 
