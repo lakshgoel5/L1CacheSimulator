@@ -8,11 +8,11 @@ CacheLines::CacheLines(size_t blockSize){
     lru = 0;
 }
 
-void CacheLines::setState(State state){
+void CacheLines::setState(MESIState state){
     this->state = state;
 }
 
-State CacheLines::getSTate(){
+MESIState CacheLines::getState(){
     return state;
 }
 
@@ -60,4 +60,9 @@ Cache::Cache(size_t numSets, size_t numLines, size_t blockSize){
     this->numLinesPerSet = numLines;
     this->blockSize = blockSize;
     this->cacheset_data.resize(numSets, CacheSet(numLines, blockSize));
+}
+
+MESIState Cache::getState(unsigned int address){
+    //remaining
+    return MESIState::I;
 }
