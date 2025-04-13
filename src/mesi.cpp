@@ -1,13 +1,13 @@
 #include "headers/mesi.hpp"
 
 ProcessMESIResult MESIProtocol::read(unsigned int address, Bus& bus, Cache& cache) {
-    MESIState mesistate = cache.getState(address);
+    MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
     ProcessMESIResult result;
     // 
     // locally initiated changes
 
     //In Shared state -> READ_HIT
-    //call updatecache with state = S (update chache function will set state to wht we send, and send it to lru)
+    //call updatecache with state = S (update chache function will set state to what we send, and send it to lru)
 
     //In Exclusive state -> READ_HIT
     // send E to updatecache
@@ -18,6 +18,8 @@ ProcessMESIResult MESIProtocol::read(unsigned int address, Bus& bus, Cache& cach
     //In invalid state -> READ_MISS
     //bus request to MEMREAD
     //send either S or E to updatecache
+    //send E if data is not present in other caches
+    //send S if data is present in other caches //doubt put on piazza
     
     return result;
 }
@@ -25,7 +27,7 @@ ProcessMESIResult MESIProtocol::read(unsigned int address, Bus& bus, Cache& cach
 ProcessMESIResult MESIProtocol::write(unsigned int address, Bus& bus, Cache& cache) {
     ProcessMESIResult result;
     // in shared state -> WRITE_HIT
-    // send INVALIDATE request to bus
+    // send INVALIDATE request to bus(go to other caches, check if that address present, if present then check the state of that cache line)
     //cahnge state to M
 
     // in Modified state -> WRITE_HIT
