@@ -58,17 +58,36 @@ void Bus::processRD(Request request) {
     bool ispresent= false;
     for(int i=0; i<processors.size(); i++){
         MESIState state = processors[i]->getCacheState(request.address);
-        if(state == MESIState::M || state == MESIState::E || state == MESIState::S) {
+        if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
+            processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
         }
-        processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+        else if(state == MESIState::M){
+            ispresent = true;
+            processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+            //copy back
+        }
     }
     if(ispresent == false){
         processors[request.processorID]->updatecacheState(request.address, MESIState::E);
+        //read from memory
+    }
+    else{
+        //read from other cache
     }
 }
 
 
 void Bus::processRDX(Request request) {
-
+    for(int i=0; i<processors.size(); i++){
+        MESIState state = processors[i]->getCacheState(request.address);
+        if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
+            processors[i]->updatecacheState(request.address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
+            //copy back
+        }
+        else if(state == MESIState::S || state == MESIState::E) {
+            processors[i]->updatecacheState(request.address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
+        }
+        
+    }
 }
