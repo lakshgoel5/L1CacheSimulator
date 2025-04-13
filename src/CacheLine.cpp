@@ -10,7 +10,6 @@ CacheLines::CacheLines(size_t blockSize){
     state = I; //Initial state is invalid
     tag = 0; //Initial tag is 0
     valid = false; //Initially not valid
-    lru = 0;
 }
 
 void CacheLines::setState(MESIState state){
@@ -33,13 +32,6 @@ bool CacheLines::isValid(){
 }
 void CacheLines::setValid(bool valid){
     this->valid = valid;
-}
-
-void CacheLines::setLru(uint32_t lru){
-    this->lru = lru;
-}
-uint32_t CacheLines::getLru(){
-    return lru;
 }
 
 void CacheLines::writebyte(size_t offset, int32_t value){
@@ -73,11 +65,14 @@ void CacheLines::writeblock(vector<int8_t> data){
     this->data = data;
 }
 
+vector<int8_t> CacheLines::readblock(){
+    return data;
+}
+
 void CacheLines::printCacheLine(){ //debug
     cout << "Cache Line State: " << state << endl;
     cout << "Tag: " << tag << endl;
     cout << "Valid: " << valid << endl;
-    cout << "LRU: " << lru << endl;
     cout << "Data: ";
     for(auto byte : data){
         cout << (int)byte << " ";

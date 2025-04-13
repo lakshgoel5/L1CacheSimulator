@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include "Request.hpp"
+#include "utils.hpp"
 //For implementing wires
 //Ties are broken arbitrarily on the bus, when multiple cores attempt bus transactions simultaneously.
 
@@ -23,7 +25,9 @@ class Bus {
         void addProcessorToBus(Processor* processor);
         void BusRead();
         void BusWrite();
-        void processRequest(BusTransaction transaction, unsigned int address, int processorID );
+        void processRequest(Request request);
+        void processRD(Request request);
+        void processRDX(Request request);
 
 };
 #endif // BUS_HPP

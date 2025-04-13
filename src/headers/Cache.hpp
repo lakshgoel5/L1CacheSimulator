@@ -32,6 +32,8 @@ class Cache{
     unsigned int getTag(unsigned int address);
     void updateCache(unsigned int address, MESIState state, vector<int8_t> data);
     void addCacheLine(unsigned int address, MESIState state, vector<int8_t> data);
+    vector<int8_t> readblock(unsigned int address);
+    void updateCacheState(unsigned int address, MESIState state);
 };
 
 

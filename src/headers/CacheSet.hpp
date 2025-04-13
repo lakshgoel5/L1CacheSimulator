@@ -1,13 +1,20 @@
 #include <vector>
 #include "CacheLine.hpp"
 #include "utils.hpp"
+#include <list>
 
 class CacheSet{
     private:
-    std::vector<CacheLines> cachelines_data; //Each CacheSet contains lines/blocks
+    std::list<CacheLines> cachelines_data; //Each CacheSet contains lines/blocks
+    //why list?
+    //I will always have to traverse this dete structure to find required data block, so O(n) anways lagna tha
+    //And I can remove element from middle and place it to start in O(1) time
 
     public:
     CacheSet(size_t numLines, size_t blockSize);
     void updateCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
     void addCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
+    MESIState getState(uint32_t tag);
+    vector<int8_t> readblock(uint32_t tag);
+    void updateCacheLineState(uint32_t tag, MESIState state);
 };

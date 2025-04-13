@@ -1,34 +1,72 @@
 #include "headers/Processor.hpp"
+#include <fstream>
+#include <iostream>
 
 Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {
+        instructionIndex = 0;
         // read trace file
-        //save data in a vector, make it in .hpp file
+        ifstream file(traceFile);
+        if (!file.is_open()) {
+            throw std::runtime_error("Could not open trace file");
+        }
+
+        string line;
+        while (getline(file, line)) {
+            // Parse the instruction and address from the line
+            InstructionType instructionType;
+            unsigned int address;
+            if (line[0] == 'R') {
+                instructionType = InstructionType::LOAD;
+            } else if (line[0] == 'W') {
+                instructionType = InstructionType::STORE;
+            } else {
+                throw std::runtime_error("Invalid instruction type in trace file");
+            }
+            //debug
+            //Memory address is 32-bit. If any address is less than 32 bit, assume remaining MSB to be 0. E.g. the
+            //address 0x817b08 is actually 0x00817b08.
+            address = std::stoul(line.substr(2), nullptr, 16);
+            instructionList.push_back(make_pair(instructionType, address));
+        }
+        file.close();
 }
 
 void Processor::cycle() {
     numOfCycles++;
     //update values for stats
     //check state of processor
+    ProcessorState currentState = getState();
+    execute(currentState);
     //call execute function or any other if needed
 }
 
-void Processor::execute() {
+void Processor::execute(ProcessorState state) {
     if(state == ProcessorState::FREE) {
         // Execute the instruction
         // get the instruction from the vector, one at a time
+        pair<InstructionType, unsigned int> pair = instructionList[instructionIndex];
+        InstructionType instructionType = pair.first;
+        unsigned int address = pair.second;
         // update instruction type to LOAD or STORE (required in execute_free function)
         // call execute_free function
-
+        ProcessMESIResult result = execute_free(instructionType);
         //increment index of vector of instrcution to next if it's a hit
         //call bus with appropriate singal
-        
+        if(result == ProcessMESIResult::CACHE_HIT) {
+            instructionIndex++;
+        }
         //stay at same index if it's a miss
+        else if(result == ProcessMESIResult::CACHE_MISS) {
+        }
         //change state to read_memory or write_memory depending on R or W
         //call bus with approprite signal
         //further processing required
 
         //If I reach to end of vector of instructions, set state to done
+        if(instructionIndex >= instructionList.size()) {
+            state = ProcessorState::DONE;
+        }
     } else if(state == ProcessorState::READ_MEMORY) {
         // stay here until num of idle cycles = 100
 
@@ -48,7 +86,7 @@ void Processor::execute() {
     }
 }
 
-void Processor::execute_free(InstructionType instructionType) {
+ProcessMESIResult Processor::execute_free(InstructionType instructionType) {
     if(instructionType == InstructionType::LOAD) {
         // call mesi function of load
         // get result which is hit or miss(Other work done by MESI only)
@@ -77,4 +115,12 @@ ProcessorState Processor::getState() {
 
 bool Processor::isDone() {
     return (state == ProcessorState::DONE);
+}
+
+MESIState Processor::getCacheState(unsigned int address) {
+    return cache.getState(address);
+}
+
+void Processor::updatecacheState(unsigned int address, MESIState state) {
+    cache.updateCacheState(address, state);
 }

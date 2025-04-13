@@ -20,7 +20,15 @@ void Bus::BusWrite() {
     // It should handle the data transfer and update the state of the processors accordingly
 }
 
-void Bus::processRequest(BusTransaction transaction, unsigned int address, int processorID) {
+void Bus::processRequest(Request request) {
+    if(!request.isToMemOrCache){
+        return; //if the request is not to memory or cache, return
+    }
+    if(request.type == TransactionType::BUSRD) {
+        processRD(request);
+    } else if(request.type == TransactionType::BUSRDX) {
+        processRDX(request);
+    }
     //go to each processor other than the processor passed in function
     //go to their caches using processor->cache (point 10, snooping transactions still continue)
     //check if the address is present in their cache(if cache not present, you get I -> do nothing as written below)
@@ -42,5 +50,25 @@ void Bus::processRequest(BusTransaction transaction, unsigned int address, int p
 
 
     //in case of MEM_READ or RWITM, set state to READ_MEMORY for current processor(already done by executeFree function in processor)
+
+}
+
+void Bus::processRD(Request request) {
+    //first figure out if address is present in other caches or not, dpending on that, call cache update
+    bool ispresent= false;
+    for(int i=0; i<processors.size(); i++){
+        MESIState state = processors[i]->getCacheState(request.address);
+        if(state == MESIState::M || state == MESIState::E || state == MESIState::S) {
+            ispresent = true;
+        }
+        processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+    }
+    if(ispresent == false){
+        processors[request.processorID]->updatecacheState(request.address, MESIState::E);
+    }
+}
+
+
+void Bus::processRDX(Request request) {
 
 }

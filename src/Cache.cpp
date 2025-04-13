@@ -16,8 +16,9 @@ Cache::Cache(size_t numSets, size_t numLines, size_t blockSize){
 }
 
 MESIState Cache::getState(unsigned int address){
-    //remaining
-    return MESIState::I;
+    unsigned int index = getIndex(address);
+    unsigned int tag = getTag(address);
+    return cacheset_data[index].getState(tag);
 }
 
 unsigned int Cache::getIndex(unsigned int address){
@@ -39,4 +40,16 @@ void Cache::addCacheLine(unsigned int address, MESIState state, vector<int8_t> d
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
     cacheset_data[index].addCacheLine(tag, state, data);
+}
+
+vector<int8_t> Cache::readblock(unsigned int address){
+    unsigned int index = getIndex(address);
+    unsigned int tag = getTag(address);
+    return cacheset_data[index].readblock(tag);
+}
+
+void Cache::updateCacheState(unsigned int address, MESIState state){
+    unsigned int index = getIndex(address);
+    unsigned int tag = getTag(address);
+    cacheset_data[index].updateCacheLineState(tag, state);
 }
