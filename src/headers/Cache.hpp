@@ -20,9 +20,18 @@ class Cache{
     uint32_t numLinesPerSet;
     uint32_t blockSize;
 
+    unsigned int indexMask;
+    unsigned int offsetBits;
+    unsigned int indexBits;
+    unsigned int tagBits;
+
     public:
     Cache(size_t numSets, size_t numLines, size_t blockSize);
     MESIState getState(unsigned int address);
+    unsigned int getIndex(unsigned int address);
+    unsigned int getTag(unsigned int address);
+    void updateCache(unsigned int address, MESIState state, vector<int8_t> data);
+    void addCacheLine(unsigned int address, MESIState state, vector<int8_t> data);
 };
 
 

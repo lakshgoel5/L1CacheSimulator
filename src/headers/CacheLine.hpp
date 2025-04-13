@@ -8,10 +8,10 @@
 
 class CacheLines{ //CacheBlock
     private:
-    std::vector<int32_t> data; //Each CacheLine contains data
+    std::vector<int8_t> data; //Each CacheLine contains data
     //Word size is 4 bytes
     MESIState state;
-    uint32_t tag; //Every cache line is associated with a tag
+    unsigned int tag; //Every cache line is associated with a tag
     bool valid; //For deciding if data is present in cache or not (initially false)
     // bool dirty;
     uint32_t lru;
@@ -21,8 +21,8 @@ class CacheLines{ //CacheBlock
     void setState(MESIState state);
     MESIState getState();
 
-    void setTag(uint32_t tag);
-    uint32_t getTag();
+    void setTag(unsigned int tag);
+    unsigned int getTag();
 
     bool isValid();
     void setValid(bool valid);
@@ -30,8 +30,11 @@ class CacheLines{ //CacheBlock
     void setLru(uint32_t lru);
     uint32_t getLru();
 
-    void writeData(size_t offset, int32_t data);
-    int32_t readData(size_t offset);
+    void writebyte(size_t offset, int32_t data);
+    void writeblock(vector<int8_t> data);
+    int8_t readbyte(size_t offset);
+    int readword(size_t offset);
+
 
     void printCacheLine(); //debug
 };

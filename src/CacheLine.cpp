@@ -21,10 +21,10 @@ MESIState CacheLines::getState(){
     return state;
 }
 
-void CacheLines::setTag(uint32_t tag){
+void CacheLines::setTag(unsigned int tag){
     this->tag = tag;
 }
-uint32_t CacheLines::getTag(){
+unsigned int CacheLines::getTag(){
     return tag;
 }
 
@@ -42,15 +42,45 @@ uint32_t CacheLines::getLru(){
     return lru;
 }
 
-void CacheLines::writeData(size_t offset, int32_t value){
+void CacheLines::writebyte(size_t offset, int32_t value){
     if(offset >= this->data.size()){
         throw out_of_range("index out of range: " + to_string(offset));
     }
     this->data[offset] = value;
 }
-int32_t CacheLines::readData(size_t offset){
+int8_t CacheLines::readbyte(size_t offset){
     if(offset >= this->data.size()){
         throw out_of_range("index out of range: " + to_string(offset));
     }
     return data[offset];
+}
+
+int CacheLines::readword(size_t offset){
+    if(offset >= this->data.size()){
+        throw out_of_range("index out of range: " + to_string(offset));
+    }
+    int value = 0;
+    for(size_t i = 0; i < 4; ++i){
+        value |= (data[offset + i] << (i * 8));
+    }
+    return value;
+}
+
+void CacheLines::writeblock(vector<int8_t> data){
+    if(data.size() != this->data.size()){
+        throw std::runtime_error("Data size does not match cache line size");
+    }
+    this->data = data;
+}
+
+void CacheLines::printCacheLine(){ //debug
+    cout << "Cache Line State: " << state << endl;
+    cout << "Tag: " << tag << endl;
+    cout << "Valid: " << valid << endl;
+    cout << "LRU: " << lru << endl;
+    cout << "Data: ";
+    for(auto byte : data){
+        cout << (int)byte << " ";
+    }
+    cout << endl;
 }
