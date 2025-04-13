@@ -9,14 +9,15 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
 void Processor::cycle() {
     numOfCycles++;
     //update values for stats
-    // get the instruction from the vector, one at a time
+    //check state of processor
     //call execute function or any other if needed
 }
 
 void Processor::execute() {
     if(state == ProcessorState::FREE) {
         // Execute the instruction
-        //update instruction type
+        // get the instruction from the vector, one at a time
+        // update instruction type
         // call execute_free function
 
         //increment index of vector of instrcution to next if it's a hit

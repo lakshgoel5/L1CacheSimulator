@@ -25,7 +25,7 @@ ProcessMESIResult MESIProtocol::read(unsigned int address, Bus& bus, Cache& cach
 ProcessMESIResult MESIProtocol::write(unsigned int address, Bus& bus, Cache& cache) {
     ProcessMESIResult result;
     // in shared state -> WRITE_HIT
-    // send INVALIDATE request to bus
+    // send INVALIDATE request to bus(go to other caches, check if that address present, if present then check the state of that cache line)
     //cahnge state to M
 
     // in Modified state -> WRITE_HIT
