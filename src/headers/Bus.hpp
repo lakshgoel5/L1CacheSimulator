@@ -24,6 +24,7 @@ class Bus {
         void processRequest();
         void BusRead();
         void BusWrite();
+        void incomingRequest(BusTransaction transaction, unsigned int address, int processorID );
 
 };
 #endif // BUS_HPP

@@ -17,7 +17,7 @@ void Processor::execute() {
     if(state == ProcessorState::FREE) {
         // Execute the instruction
         // get the instruction from the vector, one at a time
-        // update instruction type
+        // update instruction type to LOAD or STORE (required in execute_free function)
         // call execute_free function
 
         //increment index of vector of instrcution to next if it's a hit
