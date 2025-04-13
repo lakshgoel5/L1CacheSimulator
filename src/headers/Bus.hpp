@@ -21,10 +21,9 @@ class Bus {
     public:
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
-        void processRequest();
         void BusRead();
         void BusWrite();
-        void incomingRequest(BusTransaction transaction, unsigned int address, int processorID );
+        void processRequest(BusTransaction transaction, unsigned int address, int processorID );
 
 };
 #endif // BUS_HPP

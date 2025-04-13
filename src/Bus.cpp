@@ -8,11 +8,6 @@ void Bus::addProcessorToBus(Processor* processor) {
     processors.push_back(processor);
 }
 
-void Bus::processRequest(){
-    //Updateinitial data
-    //further call read or write function
-}
-
 void Bus::BusRead() {
     // Implement the logic for bus read operation
     // This function will be called when a processor wants to read data from the bus
@@ -25,7 +20,7 @@ void Bus::BusWrite() {
     // It should handle the data transfer and update the state of the processors accordingly
 }
 
-void Bus::incomingRequest(BusTransaction transaction, unsigned int address, int processorID) {
+void Bus::processRequest(BusTransaction transaction, unsigned int address, int processorID) {
     //go to each processor other than the processor passed in function
     //go to their caches using processor->cache (point 10, snooping transactions still continue)
     //check if the address is present in their cache(if cache not present, you get I -> do nothing as written below)
