@@ -27,4 +27,9 @@ enum InstructionType {
     LOAD,
     STORE,
 };
+
+enum TransactionType {
+    BUSRD,
+    BUSRDX
+};
 #endif // UTILS_HPP

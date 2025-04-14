@@ -14,7 +14,6 @@ class CacheLines{ //CacheBlock
     unsigned int tag; //Every cache line is associated with a tag
     bool valid; //For deciding if data is present in cache or not (initially false)
     // bool dirty;
-    uint32_t lru;
 
     public:
     CacheLines(size_t blockSize);
@@ -27,13 +26,12 @@ class CacheLines{ //CacheBlock
     bool isValid();
     void setValid(bool valid);
 
-    void setLru(uint32_t lru);
-    uint32_t getLru();
 
     void writebyte(size_t offset, int32_t data);
     void writeblock(vector<int8_t> data);
     int8_t readbyte(size_t offset);
     int readword(size_t offset);
+    vector<int8_t> readblock();
 
 
     void printCacheLine(); //debug
