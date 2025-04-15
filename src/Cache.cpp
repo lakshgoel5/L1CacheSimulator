@@ -53,3 +53,9 @@ void Cache::updateCacheState(unsigned int address, MESIState state){
     unsigned int tag = getTag(address);
     cacheset_data[index].updateCacheLineState(tag, state);
 }
+
+void Cache::addcacheline(unsigned int address, MESIState state, vector<int8_t> data){
+    unsigned int index = getIndex(address);
+    unsigned int tag = getTag(address);
+    cacheset_data[index].addCacheLine(tag, state, data);
+}
