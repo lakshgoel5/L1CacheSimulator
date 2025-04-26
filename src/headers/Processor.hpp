@@ -2,6 +2,8 @@
 #define PROCESSOR_HPP
 #include "Cache.hpp"
 #include "utils.hpp"
+#include "mesi.hpp"
+#include "Bus.hpp"
 
 class Processor {
     private:
@@ -19,15 +21,17 @@ class Processor {
         int numWriteBack;
         int numBusInvalidate;
         int dataTraffic;
+        MESIProtocol MESIProtocol;
+        Bus* bus;
         ProcessorState state;
         InstructionType instructionType;
         vector<pair<InstructionType, unsigned int>> instructionList; // Vector of instructions (LOAD/STORE, address) 
         int instructionIndex; 
     public:
-        Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile);
+        Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus);
         void cycle();
         void execute(ProcessorState state);
-        ProcessMESIResult execute_free(InstructionType instructionType);
+        ProcessMESIResult execute_free(InstructionType instructionType, unsigned int address);
         ProcessorState getState();
         MESIState getCacheState(unsigned int address);
         bool isDone();
