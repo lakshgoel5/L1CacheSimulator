@@ -1,5 +1,6 @@
 #include "headers/mesi.hpp"
 
+// returns whether cache hit or miss
 ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
     // locally initiated changes
@@ -12,6 +13,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
 
     //in Modified state -> READ_HIT
     // send M to updatecache
+    // case of read hit
     if(mesistate == MESIState::S || mesistate == MESIState::E || mesistate == MESIState::M) {
         cache.updateCacheState(address, mesistate); //debug try removing this readblock
         return CACHE_HIT;
@@ -22,6 +24,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
     //send either S or E to updatecache
     //send E if data is not present in other caches
     //send S if data is present in other caches //doubt put on piazza
+    // case of read miss
     else if(mesistate == MESIState::I) {
         Request request(BusTransaction::MEMREAD, processorID, TransactionType::BUSRD, address);
         bus.processRequest(request);

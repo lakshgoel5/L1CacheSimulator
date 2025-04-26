@@ -8,6 +8,17 @@ class Processor {
         int processorID;
         Cache cache;
         int numOfCycles;
+        int numInstr;
+        int numReads;
+        int numWrites;
+        int numCycles;
+        int numIdleCycles;
+        int numMiss;
+        int numMissRate; // will be computed at last
+        int numEvictions;
+        int numWriteBack;
+        int numBusInvalidate;
+        int dataTraffic;
         ProcessorState state;
         InstructionType instructionType;
         vector<pair<InstructionType, unsigned int>> instructionList; // Vector of instructions (LOAD/STORE, address) 
