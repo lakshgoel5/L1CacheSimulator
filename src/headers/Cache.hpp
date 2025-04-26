@@ -41,6 +41,7 @@ class Cache{
     }
     int getnumEvictions();
     int getnumWriteBack();
+    void printCacheMESIStates();
 };
 
 
