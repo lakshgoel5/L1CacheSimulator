@@ -10,7 +10,7 @@ class Request {
     bool isToMemOrCache = true; // debug
     TransactionType type;
     unsigned int address;
-    int countdown = 0;
+    int counter = 0;
 
     Request(BusTransaction transaction, unsigned int processorID, TransactionType type, unsigned int address): transaction(transaction) ,processorID(processorID), type(type), address(address){};
 };
