@@ -56,6 +56,7 @@ void Bus::processRequest(Request request) {
 void Bus::processRD(Request request) {
     //first figure out if address is present in other caches or not, dpending on that, call cache update
     bool ispresent= false;
+    // see other processors
     for(int i=0; i<processors.size(); i++){
         MESIState state = processors[i]->getCacheState(request.address);
         if(state == MESIState::E || state == MESIState::S) {
@@ -71,12 +72,16 @@ void Bus::processRD(Request request) {
     if(ispresent == false){
         processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive
         //read from memory
+        // left
     }
     else{
+        // stalling will occur - 2*N cycles
         //read from other cache
+        // left
     }
 }
-
+// cache eviction of modified block - left
+// handling simultaneous reads/writes to the same memory address - left
 
 void Bus::processRDX(Request request) {
     bool ispresent = false;
