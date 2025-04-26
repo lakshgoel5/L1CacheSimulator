@@ -92,6 +92,7 @@ void Bus::processRD(Request* request) {
     }
     //add cache line
     //.......
+    request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
     if(ispresent == false){
         // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
@@ -121,6 +122,7 @@ void Bus::processRDX(Request* request) {
             ispresent = true;
         }
     }
+    request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
     processors[request->processorID]->updatecacheState(request->address, MESIState::M); //goes to modified state
     if(ispresent == false){
         //read from memory

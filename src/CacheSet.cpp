@@ -25,20 +25,6 @@ void CacheSet::updateCacheLine(uint32_t tag, MESIState state, vector<int8_t> dat
     throw std::runtime_error("Cache set not found");
 }
 
-void CacheSet::addCacheLine(uint32_t tag, MESIState state, vector<int8_t> data){
-    for(auto it = this->cachelines_data.begin(); it != this->cachelines_data.end(); ++it){
-        if(it->isValid() == false){
-            it->setState(state);
-            it->setValid(true);
-            it->setTag(tag);
-            it->writeblock(data);
-            cachelines_data.splice(cachelines_data.begin(), cachelines_data, it); // Move to front
-            return;
-        }
-    }
-    throw std::runtime_error("Cache set is full");
-}
-
 MESIState CacheSet::getState(uint32_t tag){
     for(auto& cacheline : cachelines_data){
         if(cacheline.isValid() == true && cacheline.getTag() == tag){
@@ -66,15 +52,21 @@ void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
     }
 }
 
-void CacheSet::addCacheLine(uint32_t tag, MESIState state, vector<int8_t> data){
+int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     for(auto& cacheline : cachelines_data){
         if(cacheline.isValid() == false){
             cacheline.setState(state);
             cacheline.setValid(true);
             cacheline.setTag(tag);
-            cacheline.writeblock(data);
-            return;
+            return 0;
         }
+    }
+    CacheLines& lruCacheLine = cachelines_data.back(); // Get the least recently used cache line
+    MESIState state = lruCacheLine.getState();
+    if(state == MESIState::M){
+        // Handle eviction of modified block
+        // Write back to memory or other cache
+        return 100;
     }
     cachelines_data.pop_back(); // Remove the least recently used cache line
     cachelines_data.emplace_front(blockSize); // Add a new cache line at the front
