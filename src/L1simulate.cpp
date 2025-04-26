@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
     vector<Processor*> processorsInWork; //Number of processors can be variable
     Bus bus(blockSize); // bandwidth is assumed to be equal to block size for simplicity
     for(int i=0; i<NUMCORES; i++){
-        Processor processor = Processor(i, numSets, numLines, blockSize, traceFile + "_proc" + to_string(i) + ".trace");
+        Processor processor = Processor(i, numSets, numLines, blockSize, traceFile + "_proc" + to_string(i) + ".trace", &bus);
         bus.addProcessorToBus(&processor);
         processorsInWork.push_back(&processor);
     }

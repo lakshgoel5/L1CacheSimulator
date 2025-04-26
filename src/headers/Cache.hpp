@@ -34,6 +34,9 @@ class Cache{
     int addCacheLine(unsigned int address, MESIState state);
     vector<int8_t> readblock(unsigned int address);
     void updateCacheState(unsigned int address, MESIState state);
+    int getBlockSize(){
+        return this->blockSize;
+    }
 };
 
 

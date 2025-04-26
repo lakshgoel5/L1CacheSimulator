@@ -37,6 +37,9 @@ class Processor {
         bool isDone();
         void updatecacheState(unsigned int address, MESIState state);
         int addCacheLine(unsigned int address, MESIState state);
+        int getBlockSize(){
+            return cache.getBlockSize();
+        }
 };
 
 #endif // PROCESSOR_HPP
