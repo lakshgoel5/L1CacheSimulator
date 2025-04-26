@@ -14,9 +14,8 @@ class CacheSet{
     public:
     CacheSet(size_t numLines, size_t blockSize);
     void updateCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
-    void addCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
+    int addCacheLine(uint32_t tag, MESIState state);
     MESIState getState(uint32_t tag);
     vector<int8_t> readblock(uint32_t tag);
     void updateCacheLineState(uint32_t tag, MESIState state);
-    void addCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
 };

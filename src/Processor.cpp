@@ -134,3 +134,7 @@ MESIState Processor::getCacheState(unsigned int address) {
 void Processor::updatecacheState(unsigned int address, MESIState state) {
     cache.updateCacheState(address, state);
 }
+
+int Processor::addCacheLine(unsigned int address, MESIState state) {
+    return this->cache.addCacheLine(address, state);
+}

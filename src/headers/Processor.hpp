@@ -36,6 +36,7 @@ class Processor {
         MESIState getCacheState(unsigned int address);
         bool isDone();
         void updatecacheState(unsigned int address, MESIState state);
+        int addCacheLine(unsigned int address, MESIState state);
         int getBlockSize(){
             return cache.getBlockSize();
         }

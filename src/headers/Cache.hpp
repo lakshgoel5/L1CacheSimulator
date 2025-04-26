@@ -31,10 +31,9 @@ class Cache{
     unsigned int getIndex(unsigned int address);
     unsigned int getTag(unsigned int address);
     void updateCache(unsigned int address, MESIState state, vector<int8_t> data);
-    void addCacheLine(unsigned int address, MESIState state, vector<int8_t> data);
+    int addCacheLine(unsigned int address, MESIState state);
     vector<int8_t> readblock(unsigned int address);
     void updateCacheState(unsigned int address, MESIState state);
-    void addcacheline(unsigned int address, MESIState state, vector<int8_t> data);
     int getBlockSize(){
         return this->blockSize;
     }
