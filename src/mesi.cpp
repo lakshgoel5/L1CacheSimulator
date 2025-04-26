@@ -27,6 +27,8 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
     // case of read miss
     else if(mesistate == MESIState::I) {
         Request request(BusTransaction::MEMREAD, processorID, TransactionType::BUSRD, address);
+        // if bus is busy --> queue me daal // debug
+        // else ---> just process the request in the bus
         bus.processRequest(request);
         //updatecachestate done inside this request
         return CACHE_MISS;

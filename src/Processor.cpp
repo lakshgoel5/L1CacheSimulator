@@ -33,10 +33,10 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
 }
 
 void Processor::cycle() {
-    numOfCycles++;
+    numOfCycles++; // number of cycles of that processsor 
     //update values for stats
     //check state of processor
-    ProcessorState currentState = getState();
+    ProcessorState currentState = getState();  // free, readmemory, writememory
     execute(currentState);
     //call execute function or any other if needed
 }
@@ -46,13 +46,14 @@ void Processor::execute(ProcessorState state) {
         // Execute the instruction
         // get the instruction from the vector, one at a time
         pair<InstructionType, unsigned int> pair = instructionList[instructionIndex];
-        InstructionType instructionType = pair.first;
-        unsigned int address = pair.second;
+        InstructionType instructionType = pair.first; // load,store
+        unsigned int address = pair.second; // address
         // update instruction type to LOAD or STORE (required in execute_free function)
         // call execute_free function
         ProcessMESIResult result = execute_free(instructionType);
         //increment index of vector of instrcution to next if it's a hit
         //call bus with appropriate singal
+        // differentiate here with the special case - write miss S
         if(result == ProcessMESIResult::CACHE_HIT) {
             instructionIndex++;
         }
@@ -91,7 +92,7 @@ void Processor::execute(ProcessorState state) {
 }
 
 ProcessMESIResult Processor::execute_free(InstructionType instructionType) {
-    if(instructionType == InstructionType::LOAD) {
+    if(instructionType == InstructionType::LOAD) { // read
         // call mesi function of load
         // get result which is hit or miss(Other work done by MESI only)
 
@@ -100,7 +101,7 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType) {
 
         // if hit then set state to FREE
         // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
-    } else if(instructionType == InstructionType::STORE) {
+    } else if(instructionType == InstructionType::STORE) { // write
         // call mesi function of store
         // get result which is hit or miss(Other work done by MESI only)
 
