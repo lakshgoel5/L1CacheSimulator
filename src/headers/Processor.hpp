@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_HPP
-#define PROCESSOR_HPP
+#pragma once
 #include "Cache.hpp"
 #include "utils.hpp"
 #include "mesi.hpp"
@@ -39,6 +38,8 @@ class Processor {
         int getBlockSize(){
             return cache.getBlockSize();
         }
+        float getMissRate(){
+            return (float)numMiss/(float)total_instructions;
+        }
+        void PrintStats();
 };
-
-#endif // PROCESSOR_HPP

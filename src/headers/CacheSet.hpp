@@ -1,7 +1,8 @@
 #include <vector>
 #include "CacheLine.hpp"
-#include "utils.hpp"
 #include <list>
+
+using namespace std;
 
 class CacheSet{
     private:

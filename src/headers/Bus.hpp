@@ -1,11 +1,9 @@
-#ifndef BUS_HPP
-#define BUS_HPP
+#pragma once
 #include "Processor.hpp"
 #include <vector>
 #include <iostream>
 #include <string>
 #include "Request.hpp"
-#include "utils.hpp"
 #include <queue>
 //For implementing wires
 //Ties are broken arbitrarily on the bus, when multiple cores attempt bus transactions simultaneously.
@@ -35,4 +33,3 @@ class Bus {
         void cycle();
 
 };
-#endif // BUS_HPP

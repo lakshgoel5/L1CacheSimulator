@@ -155,3 +155,18 @@ void Processor::updatecacheState(unsigned int address, MESIState state) {
 int Processor::addCacheLine(unsigned int address, MESIState state) {
     return this->cache.addCacheLine(address, state);
 }
+
+void Processor::PrintStats() {
+    cout<<"Core "<<processorID<<" Statistics:"<<endl;
+    cout << "Total Instructions: " << total_instructions << endl;
+    cout << "Total Reads: " << numReads << endl;
+    cout << "Total Writes: " << numWrites << endl;
+    cout << "Total Execution Cycles: " << numOfCycles << endl;
+    cout << "Idle Cycles: " << IdleCycles << endl;
+    cout << "Cache Misses: " << numMissRate << endl;
+    cout << "Cache Miss Rate: " << getMissRate() << endl;
+    cout << "Cache Evictions: " << numEvictions << endl;
+    cout << "Writebacks: " << numWriteBack << endl;
+    cout << "Bus Invalidations: " << numBusInvalidate << endl;
+    cout << "Data Traffic (Bytes): " << dataTraffic << endl;
+}
