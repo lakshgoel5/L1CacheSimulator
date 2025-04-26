@@ -54,7 +54,7 @@ void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
 
 int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     for(auto& cacheline : cachelines_data){
-        if(cacheline.isValid() == false){
+        if(cacheline.isValid() == false || cacheline.getState() == MESIState::I){
             cacheline.setState(state);
             cacheline.setValid(true);
             cacheline.setTag(tag);
@@ -64,10 +64,12 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     CacheLines& lruCacheLine = cachelines_data.back(); // Get the least recently used cache line
     MESIState state = lruCacheLine.getState();
     if(state == MESIState::M){
+        numWriteBack++;
         // Handle eviction of modified block
         // Write back to memory or other cache
         return 100;
     }
+    numEvictions++;
     cachelines_data.pop_back(); // Remove the least recently used cache line
     cachelines_data.emplace_front(blockSize); // Add a new cache line at the front
 }

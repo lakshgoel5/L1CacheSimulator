@@ -18,8 +18,10 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
             InstructionType instructionType;
             unsigned int address;
             if (line[0] == 'R') {
+                this -> numReads++;
                 instructionType = InstructionType::LOAD;
             } else if (line[0] == 'W') {
+                this -> numWrites++;
                 instructionType = InstructionType::STORE;
             } else {
                 throw std::runtime_error("Invalid instruction type in trace file");
@@ -30,6 +32,7 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
             address = std::stoul(line.substr(2), nullptr, 16);
             instructionList.push_back(make_pair(instructionType, address));
         }
+        this->total_instructions = instructionList.size();
         file.close();
 }
 
@@ -60,6 +63,7 @@ void Processor::execute(ProcessorState state) {
         }
         //stay at same index if it's a miss
         else if(result == ProcessMESIResult::CACHE_MISS) {
+            numMiss++;
             //check if data in other caches(done in other function)
             //If in other cache, take one more cycle
 
@@ -74,12 +78,14 @@ void Processor::execute(ProcessorState state) {
             state = ProcessorState::DONE;
         }
     } else if(state == ProcessorState::READ_MEMORY) {
+        IdleCycles++;
         // stay here until num of idle cycles = 100
 
         // if num of idle cycles = 100 then set state to free and read from memory update the cache value
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::WRITE_MEMORY) {
+        IdleCycles++;
         // stay here until num of idle cycles = 100
 
         // if num of idle cycles = 100 then set state to free and write in memory update the cache value

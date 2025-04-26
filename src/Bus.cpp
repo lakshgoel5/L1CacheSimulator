@@ -35,6 +35,7 @@ void Bus::cycle(){
         currentRequest->counter--;
         if(currentRequest->counter == 0){
             //update cache line
+            processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             currentRequest = nullptr;
         }
     }
@@ -97,6 +98,7 @@ void Bus::processRD(Request* request) {
         // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
         request->counter += 100;
+        currentRequest->toBeUpdatedState = MESIState::E;
         // left
     }
     else{
@@ -106,6 +108,7 @@ void Bus::processRD(Request* request) {
         int b = processors[request->processorID]->getBlockSize();
         int n = 1<<(b-2); // debug
         request->counter += 2*n;
+        currentRequest->toBeUpdatedState = MESIState::S;
     }
 }
 // cache eviction of modified block - left
@@ -127,7 +130,7 @@ void Bus::processRDX(Request* request) {
         }
     }
     request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
-    processors[request->processorID]->updatecacheState(request->address, MESIState::M); //goes to modified state
+    currentRequest->toBeUpdatedState = MESIState::M;
     if(ispresent == false){
         //read from memory
         request->counter += 100;
