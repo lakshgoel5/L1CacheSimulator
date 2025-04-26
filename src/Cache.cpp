@@ -15,6 +15,9 @@ Cache::Cache(size_t numSets, size_t numLines, size_t blockSize){
     this->indexMask = (1 << indexBits) - 1;
 }
 
+// processes address
+// computes index and tag 
+// address -> cache[index] -> cacheset(traverses) -> gets state
 MESIState Cache::getState(unsigned int address){
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
@@ -48,8 +51,15 @@ vector<int8_t> Cache::readblock(unsigned int address){
     return cacheset_data[index].readblock(tag);
 }
 
+// index -> for identifying cache set
 void Cache::updateCacheState(unsigned int address, MESIState state){
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
     cacheset_data[index].updateCacheLineState(tag, state);
+}
+
+void Cache::addcacheline(unsigned int address, MESIState state, vector<int8_t> data){
+    unsigned int index = getIndex(address);
+    unsigned int tag = getTag(address);
+    cacheset_data[index].addCacheLine(tag, state, data);
 }
