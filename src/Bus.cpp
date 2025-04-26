@@ -2,6 +2,7 @@
 
 Bus::Bus(int bandwidth){
     this->bandwidth = bandwidth;
+    this->currentRequest = nullptr;
 }
 
 void Bus::addProcessorToBus(Processor* processor) {
@@ -20,13 +21,32 @@ void Bus::BusWrite() {
     // It should handle the data transfer and update the state of the processors accordingly
 }
 
-void Bus::processRequest(Request request) {
-    if(!request.isToMemOrCache){
+void Bus::cycle(){
+    //take element from ques
+    //decrease it's countdown
+    //if countdown = 0, then update cache line
+    if(this->currentRequest == nullptr && !this->busQueue.empty()){
+        currentRequest = &busQueue.front();
+        busQueue.pop();
+        processRequest(currentRequest);
+    }
+
+    if(currentRequest != nullptr){
+        currentRequest->countdown--;
+        if(currentRequest->countdown == 0){
+            //update cache line
+            currentRequest = nullptr;
+        }
+    }
+}
+
+void Bus::processRequest(Request* request) {
+    if(!request->isToMemOrCache){
         return; //if the request is not to memory or cache, return
     }
-    if(request.type == TransactionType::BUSRD) {
+    if(request->type == TransactionType::BUSRD) {
         processRD(request);
-    } else if(request.type == TransactionType::BUSRDX) {
+    } else if(request->type == TransactionType::BUSRDX) {
         processRDX(request);
     }
     //go to each processor other than the processor passed in function
@@ -53,24 +73,27 @@ void Bus::processRequest(Request request) {
 
 }
 
-void Bus::processRD(Request request) {
+void Bus::processRD(Request* request) {
     //first figure out if address is present in other caches or not, dpending on that, call cache update
     bool ispresent= false;
+
     // see other processors
     for(int i=0; i<processors.size(); i++){
-        MESIState state = processors[i]->getCacheState(request.address);
+        MESIState state = processors[i]->getCacheState(request->address);
         if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
-            processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
         }
         else if(state == MESIState::M){
             ispresent = true;
-            processors[i]->updatecacheState(request.address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
             //copy back
         }
     }
+    //add cache line
+    //.......
     if(ispresent == false){
-        processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
+        // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
         // left
     }
@@ -83,34 +106,36 @@ void Bus::processRD(Request request) {
 // cache eviction of modified block - left
 // handling simultaneous reads/writes to the same memory address - left
 
-void Bus::processRDX(Request request) {
+void Bus::processRDX(Request* request) {
     bool ispresent = false;
     bool ispresent = false;
-    for(int i=0; i<processors.size() && i!=request.processorID && i!=request.processorID; i++){
-        MESIState state = processors[i]->getCacheState(request.address);
+    for(int i=0; i<processors.size() && i!=request->processorID && i!=request->processorID; i++){
+        MESIState state = processors[i]->getCacheState(request->address);
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
-            processors[i]->updatecacheState(request.address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            ispresent = true;
+            processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
             //copy back
         }
         else if(state == MESIState::S || state == MESIState::E) {
-            processors[i]->updatecacheState(request.address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            ispresent = true;
+            processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
         }
     }
-    processors[request.processorID]->updatecacheState(request.address, MESIState::M); //goes to modified state
+    processors[request->processorID]->updatecacheState(request->address, MESIState::M); //goes to modified state
     if(ispresent == false){
         //read from memory
     }
     else{
     }
-    processors[request.processorID]->updatecacheState(request.address, MESIState::M); //goes to modified state
+    processors[request->processorID]->updatecacheState(request->address, MESIState::M); //goes to modified state
     if(ispresent == false){
         //read from memory
     }
     else{
         //read from other cache//read from other cache
     }
+}
+
+void Bus::addToQueue(Request request) {
+    busQueue.push(request);
 }
