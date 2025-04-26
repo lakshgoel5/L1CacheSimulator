@@ -10,6 +10,7 @@ CacheSet::CacheSet(size_t numLines, size_t blockSize){
     }
 }
 
+// debug -> when state is invalid -> you dont have to splice -> to be corrected
 void CacheSet::updateCacheLine(uint32_t tag, MESIState state, vector<int8_t> data){ //also used for adding cache line
     for(auto it = this->cachelines_data.begin(); it != this->cachelines_data.end(); ++it){
         if(it->isValid() == true && it->getTag() == tag){
