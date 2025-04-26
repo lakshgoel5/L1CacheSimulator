@@ -88,6 +88,8 @@ void Bus::processRD(Request* request) {
             ispresent = true;
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
             //copy back
+            request->counter += 100; // write back to memory of other cache
+            processors[i]->numWrites++;
         }
     }
     //add cache line
@@ -120,6 +122,8 @@ void Bus::processRDX(Request* request) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
             //copy back
+            request->counter += 100; // write back to memory of other cache
+            processors[i]->numWrites++;
         }
         else if(state == MESIState::S || state == MESIState::E) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal

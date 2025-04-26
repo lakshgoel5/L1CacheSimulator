@@ -12,8 +12,7 @@ class Processor {
         int numOfCycles;
         int numInstr;
         int numReads;
-        int numWrites;
-        int numCycles;
+        int numWrites; // cache ka bhi add
         int numIdleCycles;
         int numMiss;
         int numMissRate; // will be computed at last
