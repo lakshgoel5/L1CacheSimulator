@@ -5,7 +5,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdint>
-#include "utils.hpp"
 #include "CacheSet.hpp"
 
 using namespace std;

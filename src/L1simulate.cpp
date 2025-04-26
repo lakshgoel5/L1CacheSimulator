@@ -73,6 +73,9 @@ int main(int argc, char* argv[]){
             clock++;
         }
     }
-
+    for(int i=0; i<NUMCORES; i++){
+        processorsInWork[i]->PrintStats();
+        cout<<endl;
+    }
     return 0;
 }
