@@ -2,11 +2,12 @@
 #include <fstream>
 #include <iostream>
 
-Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile)
+Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {
         instructionIndex = 0;
         // read trace file
         ifstream file(traceFile);
+        this-> bus = bus;
         if (!file.is_open()) {
             throw std::runtime_error("Could not open trace file");
         }
@@ -50,7 +51,7 @@ void Processor::execute(ProcessorState state) {
         unsigned int address = pair.second; // address
         // update instruction type to LOAD or STORE (required in execute_free function)
         // call execute_free function
-        ProcessMESIResult result = execute_free(instructionType);
+        ProcessMESIResult result = execute_free(instructionType, address);
         //increment index of vector of instrcution to next if it's a hit
         //call bus with appropriate singal
         // differentiate here with the special case - write miss S
@@ -91,9 +92,11 @@ void Processor::execute(ProcessorState state) {
     }
 }
 
-ProcessMESIResult Processor::execute_free(InstructionType instructionType) {
+// returns -> 
+ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
     if(instructionType == InstructionType::LOAD) { // read
         // call mesi function of load
+        ProcessMESIResult state = MESIProtocol.read(this->processorID, address, *this-> bus,this->cache);
         // get result which is hit or miss(Other work done by MESI only)
 
                 //if miss, I have sent bus request to read from memory or from other caches, and update cache transition to required status(updateCacheState)
@@ -101,15 +104,17 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType) {
 
         // if hit then set state to FREE
         // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
+        return state;
     } else if(instructionType == InstructionType::STORE) { // write
         // call mesi function of store
         // get result which is hit or miss(Other work done by MESI only)
-
+        ProcessMESIResult state = MESIProtocol.read(this->processorID, address, *this-> bus,this->cache);
         //if miss, I have sent bus request to read from memory, and update cache transition to required status
         //so no need to do anything
 
         // if hit then set state to FREE
         // if not hit, then set state to WRITE_MEMORY, so that I can stay there for 100 cycles
+        return state;
     }
     
 }
