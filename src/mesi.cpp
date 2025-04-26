@@ -29,7 +29,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
         Request request(BusTransaction::MEMREAD, processorID, TransactionType::BUSRD, address);
         // if bus is busy --> queue me daal // debug
         // else ---> just process the request in the bus
-        bus.processRequest(request);
+        bus.addToQueue(request);
         //updatecachestate done inside this request
         return CACHE_MISS;
         /*
@@ -53,7 +53,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
     //cahnge state to M
     if(mesistate == MESIState::S){
         Request request(BusTransaction::INVALIDATE, processorID, TransactionType::BUSRDX, address);
-        bus.processRequest(request);
+        bus.addToQueue(request);
         //updatecache inside processRDX
         return CACHE_HIT;
     }
@@ -77,7 +77,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
     // change state to M
     else if(mesistate == MESIState::I){
         Request request(BusTransaction::RWITM, processorID, TransactionType::BUSRDX, address);
-        bus.processRequest(request);
+        bus.addToQueue(request);
         //updatecache inside processRDX
         return CACHE_MISS;
     }

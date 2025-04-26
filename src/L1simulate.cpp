@@ -65,6 +65,7 @@ int main(int argc, char* argv[]){
                 processorsInWork[i]->cycle();
             }
         }
+        bus.cycle();
         if(AllDone){
             break;
         }

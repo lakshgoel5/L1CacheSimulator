@@ -26,7 +26,7 @@ class Processor {
         ProcessorState state;
         InstructionType instructionType;
         vector<pair<InstructionType, unsigned int>> instructionList; // Vector of instructions (LOAD/STORE, address) 
-        int instructionIndex; 
+        int instructionIndex;
     public:
         Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus);
         void cycle();
