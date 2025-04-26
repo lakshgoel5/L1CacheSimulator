@@ -9,17 +9,6 @@ class Processor {
     private:
         int processorID;
         Cache cache;
-        int numOfCycles;
-        int numInstr;
-        int numReads;
-        int numWrites; // cache ka bhi add
-        int numIdleCycles;
-        int numMiss;
-        int numMissRate; // will be computed at last
-        int numEvictions;
-        int numWriteBack;
-        int numBusInvalidate;
-        int dataTraffic;
         MESIProtocol MESIProtocol;
         Bus* bus;
         ProcessorState state;
@@ -27,6 +16,17 @@ class Processor {
         vector<pair<InstructionType, unsigned int>> instructionList; // Vector of instructions (LOAD/STORE, address) 
         int instructionIndex;
     public:
+        int numOfCycles = 0;
+        int total_instructions = 0;
+        int numReads = 0;
+        int numWrites = 0;
+        int IdleCycles = 0;
+        int numMiss = 0;
+        int numMissRate = 0; // will be computed at last
+        int numEvictions = 0;
+        int numWriteBack = 0;
+        int numBusInvalidate = 0;
+        int dataTraffic = 0;
         Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus);
         void cycle();
         void execute(ProcessorState state);

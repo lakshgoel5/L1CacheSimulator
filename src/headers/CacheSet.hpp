@@ -12,6 +12,8 @@ class CacheSet{
     uint32_t blockSize;
 
     public:
+    int numWriteBack = 0;
+    int numEvictions = 0;
     CacheSet(size_t numLines, size_t blockSize);
     void updateCacheLine(uint32_t tag, MESIState state, vector<int8_t> data);
     int addCacheLine(uint32_t tag, MESIState state);

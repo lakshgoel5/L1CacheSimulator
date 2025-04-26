@@ -57,3 +57,17 @@ int Cache::addCacheLine(unsigned int address, MESIState state){
     unsigned int tag = getTag(address);
     cacheset_data[index].addCacheLine(tag, state);
 }
+
+int Cache::getnumEvictions(){
+    for (auto& cacheset : cacheset_data){
+        numEvictions += cacheset.numEvictions;
+    }
+    return numEvictions;
+}
+
+int Cache::getnumWriteBack(){
+    for (auto& cacheset : cacheset_data){
+        numWriteBack += cacheset.numWriteBack;
+    }
+    return numWriteBack;
+}

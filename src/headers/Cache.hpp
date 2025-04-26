@@ -26,6 +26,8 @@ class Cache{
     unsigned int tagBits;
 
     public:
+    int numEvictions = 0;
+    int numWriteBack = 0;
     Cache(size_t numSets, size_t numLines, size_t blockSize);
     MESIState getState(unsigned int address);
     unsigned int getIndex(unsigned int address);
@@ -37,6 +39,8 @@ class Cache{
     int getBlockSize(){
         return this->blockSize;
     }
+    int getnumEvictions();
+    int getnumWriteBack();
 };
 
 
