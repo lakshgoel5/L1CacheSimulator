@@ -1,5 +1,7 @@
 #include "headers/Bus.hpp"
 
+bool debug_bus = false;
+
 Bus::Bus(int bandwidth){
     this->bandwidth = bandwidth;
     this->currentRequest = nullptr;
@@ -30,10 +32,16 @@ void Bus::cycle(){
         busQueue.pop();
         processRequest(currentRequest);
     }
-
+    if(debug_bus){
+        cout << "Current Request: " << currentRequest->transaction << " " << currentRequest->address << endl;
+        cout << "Current Request Counter: " << currentRequest->counter << endl;
+    }
     if(currentRequest != nullptr){
         currentRequest->counter--;
         if(currentRequest->counter == 0){
+            if(debug_bus){
+                cout<< "DONE Current Request: " << currentRequest->transaction << " " << currentRequest->address << endl;
+            }
             //update cache line
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             currentRequest = nullptr;
@@ -46,8 +54,14 @@ void Bus::processRequest(Request* request) {
         return; //if the request is not to memory or cache, return
     }
     if(request->type == TransactionType::BUSRD) {
+        if(debug_bus){
+            cout << "Processing Bus Read" << endl;
+        }
         processRD(request);
     } else if(request->type == TransactionType::BUSRDX) {
+        if(debug_bus){
+            cout << "Processing Bus RDX" << endl;
+        }
         processRDX(request);
     }
     //go to each processor other than the processor passed in function

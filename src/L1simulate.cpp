@@ -13,7 +13,21 @@ using namespace std;
 #define NUMCORES 4
 
 bool debug = true; // Set to true for debugging
-
+void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
+    cout << "Trace File: " << tracePrefix << endl;
+    cout << "Set Index Bits: " << setIndexBits << endl;
+    cout << "Associativity: " << Associativity << endl;
+    cout << "Block Bits: " << blockBits << endl;
+    cout << "Block Size: " << (1<<blockBits) << endl;
+    cout << "Number of sets: " << (1<<setIndexBits) << endl;
+    // numsets*associativity*block size
+    int cacheSize = (1<<setIndexBits) * Associativity * (1<<blockBits);
+    cout << "Cache size: " << cacheSize/1024 << endl;
+    cout << "Mesi Protocol: Enabled"<<endl;
+    cout << "Write Policy: Write-back, Write-allocate"<<endl;
+    cout << "Replacement Policy: LRU" << endl;
+    cout << "Bus: Central snooping bus" << endl;
+}
 int main(int argc, char* argv[]){
     // Parse command line arguments
     if(argc > 1 && strcmp(argv[1], "-h") == 0){
@@ -95,6 +109,7 @@ int main(int argc, char* argv[]){
             clock++;
         }
     }
+    printSimulationParameters(traceFile, setIndexBits, numLines, blockSize);
     for(int i=0; i<NUMCORES; i++){
         processorsInWork[i]->PrintStats();
         cout<<endl;
