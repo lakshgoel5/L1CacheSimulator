@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = true; // Set to true for debugging
+bool debug = false; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
@@ -30,7 +30,7 @@ void printSimulationParameters(string tracePrefix, int setIndexBits, int Associa
     cout << "Bus: Central snooping bus" << endl;
 }
 int main(int argc, char* argv[]){
-    int stop_at_cycle = 100000000; //default value //debug
+    unsigned long long stop_at_cycle = 1000000000000000; //default value //debug
     if(debug){
         cin >> stop_at_cycle;
     }

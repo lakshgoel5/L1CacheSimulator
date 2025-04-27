@@ -1,6 +1,6 @@
 #include "headers/mesi.hpp"
 
-bool debug_mesi = true; // Set to true for debugging
+bool debug_mesi = false; // Set to true for debugging
 
 // returns whether cache hit or miss
 ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus& bus, Cache& cache) {
