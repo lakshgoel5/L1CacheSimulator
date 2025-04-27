@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
     unsigned int clock = 0;
     while(true){
         bool AllDone = true;
-        cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
+        if(debug) cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
                 AllDone = false;
