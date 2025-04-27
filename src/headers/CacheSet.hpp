@@ -21,4 +21,5 @@ class CacheSet{
     MESIState getState(uint32_t tag);
     vector<int8_t> readblock(uint32_t tag);
     void updateCacheLineState(uint32_t tag, MESIState state);
+    void printCacheMESIStates();
 };

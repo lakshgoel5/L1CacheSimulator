@@ -73,3 +73,12 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     cachelines_data.pop_back(); // Remove the least recently used cache line
     cachelines_data.emplace_front(blockSize); // Add a new cache line at the front
 }
+
+void CacheSet::printCacheMESIStates(){
+    int i=0;
+    for(auto& cacheline : cachelines_data){
+        cout << "Cacheline number: " << i++ << " " << endl;
+        cout << cacheline.getState() << " " << endl;
+    }
+    cout << endl;
+}

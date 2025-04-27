@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+bool debug = false; // Set to true for debugging
+
 Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {
         instructionIndex = 0;
@@ -41,6 +43,12 @@ void Processor::cycle() {
     //update values for stats
     //check state of processor
     ProcessorState currentState = getState();  // free, readmemory, writememory
+    if(debug) {
+        cout << "Current state of processor " << currentState << endl;
+        //print MESI tag of each cache line
+        cout << "^^^^^^Cache MESI States^^^^^^" << endl;
+        cache.printCacheMESIStates();
+    }
     execute(currentState);
     //call execute function or any other if needed
 }
@@ -100,9 +108,11 @@ void Processor::execute(ProcessorState state) {
 
 // returns -> 
 ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
+    if(debug){cout << "Starting free execution" << endl; }
     if(instructionType == InstructionType::LOAD) { // read
         // call mesi function of load
         ProcessMESIResult state = MESIProtocol.read(this->processorID, address, *this-> bus,this->cache);
+        if(debug){cout << "State from MESI in read: " << state << endl; }
         // get result which is hit or miss(Other work done by MESI only)
 
                 //if miss, I have sent bus request to read from memory or from other caches, and update cache transition to required status(updateCacheState)
@@ -115,6 +125,7 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
         // call mesi function of store
         // get result which is hit or miss(Other work done by MESI only)
         ProcessMESIResult state = MESIProtocol.read(this->processorID, address, *this-> bus,this->cache);
+        if(debug){cout << "State from MESI in write: " << state << endl; }
         //if miss, I have sent bus request to read from memory, and update cache transition to required status
         //so no need to do anything
 

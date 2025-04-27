@@ -71,3 +71,10 @@ int Cache::getnumWriteBack(){
     }
     return numWriteBack;
 }
+
+void Cache::printCacheMESIStates(){
+    for (size_t i = 0; i < cacheset_data.size(); i++){
+        cout << "Cache Set " << i << ": ";
+        cacheset_data[i].printCacheMESIStates();
+    }
+}

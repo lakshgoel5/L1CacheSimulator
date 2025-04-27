@@ -11,6 +11,8 @@ using namespace std;
 
 #define NUMCORES 4
 
+bool debug = false; // Set to true for debugging
+
 int main(int argc, char* argv[]){
     // Parse command line arguments
     if (argc != 11) { //debug
@@ -47,6 +49,14 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+    if(debug){
+        cout << "Trace File: " << traceFile << endl;
+        cout << "Set Index Bits: " << setIndexBits << endl;
+        cout << "Number of Lines: " << numLines << endl;
+        cout << "Block Size: " << blockSize << endl;
+        cout << "Output File: " << outputFile << endl;
+    }
+
     size_t numSets = pow(2, setIndexBits);
     vector<Processor*> processorsInWork; //Number of processors can be variable
     Bus bus(blockSize); // bandwidth is assumed to be equal to block size for simplicity
@@ -62,8 +72,15 @@ int main(int argc, char* argv[]){
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
                 AllDone = false;
+                if(debug){
+                    cout << "--------Clock Cycle " << clock << "----------" << endl;
+                    cout << "**********Current Processor " << i << "***********" << endl;
+                }
                 processorsInWork[i]->cycle();
             }
+        }
+        if(debug){
+            cout << "Starting bus cycle" << endl;
         }
         bus.cycle();
         if(AllDone){
