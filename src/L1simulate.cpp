@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
             cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
         }
         bus.cycle();
-        if(AllDone || clock > stop_at_cycle){
+        if((AllDone && bus.isDone()) || clock > stop_at_cycle){
             break;
         }
         else{

@@ -215,3 +215,7 @@ void Bus::processRDX(Request* request) {
 void Bus::addToQueue(Request request) {
     busQueue.push(request);
 }
+
+bool Bus::isDone() {
+    return busQueue.empty() && currentRequest == nullptr;
+}

@@ -34,5 +34,6 @@ class Bus {
         void processRD(Request* request);
         void processRDX(Request* request);
         void cycle();
+        bool isDone();
 
 };
