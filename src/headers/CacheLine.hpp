@@ -6,6 +6,8 @@
 #include "utils.hpp"
 #include <cstdint>
 
+using namespace std;
+
 class CacheLines{ //CacheBlock
     private:
     std::vector<int8_t> data; //Each CacheLine contains data

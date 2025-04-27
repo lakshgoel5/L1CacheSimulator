@@ -1,11 +1,9 @@
-#ifndef BUS_HPP
-#define BUS_HPP
+#pragma once
 #include "Processor.hpp"
 #include <vector>
 #include <iostream>
 #include <string>
 #include "Request.hpp"
-#include "utils.hpp"
 #include <queue>
 //For implementing wires
 //Ties are broken arbitrarily on the bus, when multiple cores attempt bus transactions simultaneously.
@@ -15,6 +13,9 @@
 // Amount of data traffic (in bytes) on the bus.
 
 using namespace std;
+
+class Processor; // Forward declaration
+class Request; // Forward declaration
 
 class Bus {
     private:
@@ -33,6 +34,6 @@ class Bus {
         void processRD(Request* request);
         void processRDX(Request* request);
         void cycle();
+        bool isDone();
 
 };
-#endif // BUS_HPP

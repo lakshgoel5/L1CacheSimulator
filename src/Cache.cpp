@@ -39,12 +39,6 @@ void Cache::updateCache(unsigned int address, MESIState state, vector<int8_t> da
     cacheset_data[index].updateCacheLine(tag, state, data);
 }
 
-void Cache::addCacheLine(unsigned int address, MESIState state, vector<int8_t> data){
-    unsigned int index = getIndex(address);
-    unsigned int tag = getTag(address);
-    cacheset_data[index].addCacheLine(tag, state, data);
-}
-
 vector<int8_t> Cache::readblock(unsigned int address){
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
@@ -58,8 +52,29 @@ void Cache::updateCacheState(unsigned int address, MESIState state){
     cacheset_data[index].updateCacheLineState(tag, state);
 }
 
-void Cache::addcacheline(unsigned int address, MESIState state, vector<int8_t> data){
+int Cache::addCacheLine(unsigned int address, MESIState state){
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
-    cacheset_data[index].addCacheLine(tag, state, data);
+    return cacheset_data[index].addCacheLine(tag, state);
+}
+
+int Cache::getnumEvictions(){
+    for (auto& cacheset : cacheset_data){
+        numEvictions += cacheset.numEvictions;
+    }
+    return numEvictions;
+}
+
+int Cache::getnumWriteBack(){
+    for (auto& cacheset : cacheset_data){
+        numWriteBack += cacheset.numWriteBack;
+    }
+    return numWriteBack;
+}
+
+void Cache::printCacheMESIStates(){
+    for (size_t i = 0; i < cacheset_data.size(); i++){
+        cout << "Cache Set " << i << ": ";
+        cacheset_data[i].printCacheMESIStates();
+    }
 }

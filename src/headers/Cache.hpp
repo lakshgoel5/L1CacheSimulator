@@ -5,7 +5,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdint>
-#include "utils.hpp"
 #include "CacheSet.hpp"
 
 using namespace std;
@@ -26,15 +25,22 @@ class Cache{
     unsigned int tagBits;
 
     public:
+    int numEvictions = 0;
+    int numWriteBack = 0;
     Cache(size_t numSets, size_t numLines, size_t blockSize);
     MESIState getState(unsigned int address);
     unsigned int getIndex(unsigned int address);
     unsigned int getTag(unsigned int address);
     void updateCache(unsigned int address, MESIState state, vector<int8_t> data);
-    void addCacheLine(unsigned int address, MESIState state, vector<int8_t> data);
+    int addCacheLine(unsigned int address, MESIState state);
     vector<int8_t> readblock(unsigned int address);
     void updateCacheState(unsigned int address, MESIState state);
-    void addcacheline(unsigned int address, MESIState state, vector<int8_t> data);
+    int getBlockSize(){
+        return this->blockSize;
+    }
+    int getnumEvictions();
+    int getnumWriteBack();
+    void printCacheMESIStates();
 };
 
 

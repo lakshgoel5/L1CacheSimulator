@@ -1,9 +1,8 @@
-#ifndef MESI_HPP
-#define MESI_HPP
-#include "utils.hpp"
+#pragma once
+// #include "utils.hpp"
 #include "Bus.hpp"
-#include "Cache.hpp"
-#include "Request.hpp"
+
+class Bus; // Forward declaration
 
 //What MESI do on load and store
 class MESIProtocol {
@@ -11,5 +10,3 @@ class MESIProtocol {
         ProcessMESIResult read(int processorID, unsigned int address, Bus& bus, Cache& cache);
         ProcessMESIResult write(int processorID, unsigned int address, Bus& bus, Cache& cache);
 };
-
-#endif // MESI_HPP
