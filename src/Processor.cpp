@@ -134,7 +134,7 @@ void Processor::execute(ProcessorState state) {
 
 // returns -> 
 ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
-    if(debug_processor){cout << "Starting free execution" << endl; }
+    if(debug_processor){cout << "Starting free execution, going to MESI" << endl; }
     ProcessMESIResult state = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
     if(instructionType == InstructionType::LOAD) { // read
         // call mesi function of load
