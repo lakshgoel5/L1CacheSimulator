@@ -99,7 +99,7 @@ int main(int argc, char* argv[]){
             }
         }
         if(debug){
-            cout << "Starting bus cycle" << endl;
+            cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
         }
         bus.cycle();
         if(AllDone || clock > 5){

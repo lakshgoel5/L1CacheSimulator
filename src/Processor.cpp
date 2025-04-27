@@ -70,7 +70,12 @@ void Processor::execute(ProcessorState state) {
         // call execute_free function
         ProcessMESIResult result = execute_free(instructionType, address);
         if(debug_processor) {
-            cout << "Result from execute_free: " << result << endl;
+            cout << "Result from execute_free: ";
+            if(result == ProcessMESIResult::CACHE_HIT) {
+                cout << "CACHE_HIT" << endl;
+            } else if(result == ProcessMESIResult::CACHE_MISS) {
+                cout << "CACHE_MISS" << endl;
+            }
         }
         //increment index of vector of instrcution to next if it's a hit
         //call bus with appropriate singal
@@ -133,7 +138,6 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
     ProcessMESIResult state = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
     if(instructionType == InstructionType::LOAD) { // read
         // call mesi function of load
-        if(debug_processor){cout << "State from MESI in read: " << state << endl; }
         // get result which is hit or miss(Other work done by MESI only)
 
         //if miss, I have sent bus request to read from memory or from other caches, and update cache transition to required status(updateCacheState)

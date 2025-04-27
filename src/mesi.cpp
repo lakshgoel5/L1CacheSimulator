@@ -44,10 +44,26 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
         // else ---> just process the request in the bus
         if(debug_mesi){
             cout << "Adding request to bus queue" << endl; 
-            cout << "Request type: " << request.type << endl; 
+            cout << "Request type: ";
+            if(request.type == TransactionType::BUSRD) { 
+                cout << "BUSRD" << endl; 
+            }
+            else if(request.type == TransactionType::BUSRDX) {
+                cout << "BUSRDX" << endl; 
+            }
+            else { cout << "Unknown" << endl; }
             cout << "Request address: " << request.address << endl;
             cout << "Request processor ID: " << request.processorID << endl; 
-            cout << "Bus transaction type: " << request.transaction << endl; 
+            cout << "Bus transaction type: ";
+            if(request.transaction == BusTransaction::MEMREAD) { 
+                cout << "MEMREAD" << endl; 
+            }
+            else if(request.transaction == BusTransaction::RWITM) {
+                cout << "RWITM" << endl; 
+            }
+            else if(request.transaction == BusTransaction::INVALIDATE) {
+                cout << "INVALIDATE" << endl;
+            } 
         }
         bus.addToQueue(request);
         //updatecachestate done inside this request
