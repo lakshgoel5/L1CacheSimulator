@@ -14,6 +14,7 @@ using namespace std;
 
 bool debug = true; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
+    cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
     cout << "Set Index Bits: " << setIndexBits << endl;
     cout << "Associativity: " << Associativity << endl;
@@ -113,7 +114,9 @@ int main(int argc, char* argv[]){
             clock++;
         }
     }
+    cout<<endl;
     printSimulationParameters(traceFile, setIndexBits, numLines, blockSize);
+    cout<<endl;
     for(int i=0; i<NUMCORES; i++){
         processorsInWork[i]->PrintStats();
         cout<<endl;

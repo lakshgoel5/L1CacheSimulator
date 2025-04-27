@@ -31,7 +31,7 @@ class Processor {
         int dataTraffic = 0;
         Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus);
         void cycle();
-        void execute(ProcessorState state);
+        void execute();
         ProcessMESIResult execute_free(InstructionType instructionType, unsigned int address);
         ProcessorState getState();
         MESIState getCacheState(unsigned int address);
@@ -45,4 +45,8 @@ class Processor {
             return (float)numMiss/(float)total_instructions;
         }
         void PrintStats();
+        void updateStateToFree() {
+            this->state = ProcessorState::FREE;
+            this->instructionIndex++;
+        }
 };

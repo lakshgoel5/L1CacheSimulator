@@ -33,17 +33,27 @@ void Bus::cycle(){
         processRequest(currentRequest);
     }
     if(debug_bus){
-        cout << "Current Request: " << currentRequest->transaction << " " << currentRequest->address << endl;
+        cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
+        cout << "Current Request transaction: ";
+        if(currentRequest->transaction == BusTransaction::MEMREAD) {
+            cout << "MEMREAD" << endl;
+        } else if(currentRequest->transaction == BusTransaction::RWITM) {
+            cout << "RWITM" << endl;
+        } else if(currentRequest->transaction == BusTransaction::INVALIDATE) {
+            cout << "INVALIDATE" << endl;
+        }
+        cout << "Address " << hex << currentRequest->address << dec << endl;
         cout << "Current Request Counter: " << currentRequest->counter << endl;
     }
     if(currentRequest != nullptr){
         currentRequest->counter--;
         if(currentRequest->counter == 0){
             if(debug_bus){
-                cout<< "DONE Current Request: " << currentRequest->transaction << " " << currentRequest->address << endl;
+                cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
             }
             //update cache line
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
+            processors[currentRequest->processorID]->updateStateToFree();
             currentRequest = nullptr;
         }
     }
@@ -147,7 +157,7 @@ void Bus::processRD(Request* request) {
         if(debug_bus){
             cout << "request counter before updating is " << request->counter << endl;
         }
-        request->counter += 200;
+        request->counter += 100;
         if(debug_bus){
             cout << "request counter after updating is " << request->counter << endl;
         }

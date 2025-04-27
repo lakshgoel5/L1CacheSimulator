@@ -52,7 +52,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
                 cout << "BUSRDX" << endl; 
             }
             else { cout << "Unknown" << endl; }
-            cout << "Request address: " << request.address << endl;
+            cout << "Request address: " << hex << request.address << dec << endl;
             cout << "Request processor ID: " << request.processorID << endl; 
             cout << "Bus transaction type: ";
             if(request.transaction == BusTransaction::MEMREAD) { 
@@ -95,7 +95,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
         if(debug_mesi){
             cout << "Adding request to bus queue" << endl; 
             cout << "Request type: " << request.type << endl; 
-            cout << "Request address: " << request.address << endl;
+            cout << "Request address: " << hex << request.address << dec << endl;
             cout << "Request processor ID: " << request.processorID << endl; 
             cout << "Bus transaction type: " << request.transaction << endl; 
         }
@@ -129,7 +129,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
         if(debug_mesi){
             cout << "Adding request to bus queue" << endl; 
             cout << "Request type: " << request.type << endl; 
-            cout << "Request address: " << request.address << endl;
+            cout << "Request address: " << hex << request.address << dec << endl;
             cout << "Request processor ID: " << request.processorID << endl; 
             cout << "Bus transaction type: " << request.transaction << endl; 
         }
