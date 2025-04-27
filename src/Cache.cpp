@@ -55,7 +55,7 @@ void Cache::updateCacheState(unsigned int address, MESIState state){
 int Cache::addCacheLine(unsigned int address, MESIState state){
     unsigned int index = getIndex(address);
     unsigned int tag = getTag(address);
-    cacheset_data[index].addCacheLine(tag, state);
+    return cacheset_data[index].addCacheLine(tag, state);
 }
 
 int Cache::getnumEvictions(){

@@ -118,7 +118,6 @@ void Bus::processRD(Request* request) {
 
 void Bus::processRDX(Request* request) {
     bool ispresent = false;
-    bool ispresent = false;
     for(int i=0; i<processors.size() && i!=request->processorID && i!=request->processorID; i++){
         MESIState state = processors[i]->getCacheState(request->address);
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid

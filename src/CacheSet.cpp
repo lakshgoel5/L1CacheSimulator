@@ -62,16 +62,18 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
         }
     }
     CacheLines& lruCacheLine = cachelines_data.back(); // Get the least recently used cache line
-    MESIState state = lruCacheLine.getState();
-    if(state == MESIState::M){
-        numWriteBack++;
-        // Handle eviction of modified block
-        // Write back to memory or other cache
-        return 100;
-    }
+    MESIState lrustate = lruCacheLine.getState();
+
     numEvictions++;
     cachelines_data.pop_back(); // Remove the least recently used cache line
     cachelines_data.emplace_front(blockSize); // Add a new cache line at the front
+    if(lrustate == MESIState::M){
+        // Handle eviction of modified block
+        // Write back to memory or other cache
+        numWriteBack++;
+        return 100;
+    }
+    return 0;
 }
 
 void CacheSet::printCacheMESIStates(){

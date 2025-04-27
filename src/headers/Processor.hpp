@@ -4,11 +4,14 @@
 #include "mesi.hpp"
 #include "Bus.hpp"
 
+class Bus; // Forward declaration
+class MESIProtocol; // Forward declaration
+
 class Processor {
     private:
         int processorID;
         Cache cache;
-        MESIProtocol MESIProtocol;
+        MESIProtocol* mesiProtocol;
         Bus* bus;
         ProcessorState state;
         InstructionType instructionType;

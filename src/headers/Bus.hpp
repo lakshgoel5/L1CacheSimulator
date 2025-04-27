@@ -14,6 +14,9 @@
 
 using namespace std;
 
+class Processor; // Forward declaration
+class Request; // Forward declaration
+
 class Bus {
     private:
         vector<Processor*> processors;
