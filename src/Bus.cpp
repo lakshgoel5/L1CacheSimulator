@@ -91,13 +91,31 @@ void Bus::processRequest(Request* request) {
 void Bus::processRD(Request* request) {
     //first figure out if address is present in other caches or not, dpending on that, call cache update
     bool ispresent= false;
+    if(debug_bus){
+        cout << endl;
+        cout << "Inside ProcessRD function" << endl;
+    }
 
     // see other processors
     for(int i=0; i<processors.size(); i++){
         MESIState state = processors[i]->getCacheState(request->address);
+        if(debug_bus){
+            cout << "Checking for data in Cache of Processor number " << i << endl;
+        }
         if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+            if(debug_bus){
+                cout << "Data present in other caches, so is_present is true and state is";
+                if (state == MESIState::E) {
+                    cout << "E" << endl;
+                }
+                else if (state == MESIState::S) {
+                    cout << "S" << endl;
+                }
+                else if (state == MESIState::M)
+                    cout << "M" << endl;
+            }
         }
         else if(state == MESIState::M){
             ispresent = true;
@@ -105,6 +123,19 @@ void Bus::processRD(Request* request) {
             //copy back
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
+            if(debug_bus){
+                cout << "Data present in other caches, so is_present is true and state is";
+                if (state == MESIState::E) {
+                    cout << "E" << endl;
+                }
+                else if (state == MESIState::S) {
+                    cout << "S" << endl;
+                }
+                else if (state == MESIState::M)
+                    cout << "M" << endl;
+                cout << "Due to M state, so copy back to memory. Request counter changed to " << request->counter << endl;
+            }
+
         }
     }
     //add cache line
@@ -113,8 +144,17 @@ void Bus::processRD(Request* request) {
     if(ispresent == false){
         // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
-        request->counter += 100;
+        if(debug_bus){
+            cout << "request counter before updating is " << request->counter << endl;
+        }
+        request->counter += 200;
+        if(debug_bus){
+            cout << "request counter after updating is " << request->counter << endl;
+        }
         currentRequest->toBeUpdatedState = MESIState::E;
+        if(debug_bus){
+            cout << "Data not present in other caches, so setting counter to " << request->counter << endl;
+        }
         // left
     }
     else{
@@ -125,6 +165,9 @@ void Bus::processRD(Request* request) {
         int n = 1<<(b-2); // debug
         request->counter += 2*n;
         currentRequest->toBeUpdatedState = MESIState::S;
+        if(debug_bus){
+            cout << "Data present in other caches, so setting counter to " << request->counter << endl;
+        }
     }
 }
 // cache eviction of modified block - left

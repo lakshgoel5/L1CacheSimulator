@@ -29,6 +29,10 @@ void printSimulationParameters(string tracePrefix, int setIndexBits, int Associa
     cout << "Bus: Central snooping bus" << endl;
 }
 int main(int argc, char* argv[]){
+    int stop_at_cycle = 100000000; //default value //debug
+    if(debug){
+        cin >> stop_at_cycle;
+    }
     // Parse command line arguments
     if(argc > 1 && strcmp(argv[1], "-h") == 0){
         cout << "Usage: " << argv[0] << " -t <tracefile> -s <number of set index bits> -E <number of lines per set> -b <block size in bytes> -o <output file>" << endl;
@@ -102,7 +106,7 @@ int main(int argc, char* argv[]){
             cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
         }
         bus.cycle();
-        if(AllDone || clock > 5){
+        if(AllDone || clock > stop_at_cycle){
             break;
         }
         else{
