@@ -6,7 +6,14 @@ bool debug_mesi = true; // Set to true for debugging
 ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     if(debug_mesi){cout << "Starting read execution in MESI protocol" << endl; }
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
-    if(debug_mesi){cout << "State of Cache line is : " << mesistate << endl; }
+    if(debug_mesi){
+        cout << "State of Cache line is : "; 
+        if(mesistate == MESIState::S) { cout << "S" << endl; }
+        else if(mesistate == MESIState::E) { cout << "E" << endl; }
+        else if(mesistate == MESIState::M) { cout << "M" << endl; }
+        else if(mesistate == MESIState::I) { cout << "I" << endl; }
+    
+    }
     // locally initiated changes
 
     //In Shared state -> READ_HIT
