@@ -19,10 +19,10 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
             // Parse the instruction and address from the line
             InstructionType instructionType;
             unsigned int address;
-            if (line[0] == 'R') {
+            if (line[0] == 'R' || line[0] == 'r') {
                 this -> numReads++;
                 instructionType = InstructionType::LOAD;
-            } else if (line[0] == 'W') {
+            } else if (line[0] == 'W' || line[0] == 'w') {
                 this -> numWrites++;
                 instructionType = InstructionType::STORE;
             } else {

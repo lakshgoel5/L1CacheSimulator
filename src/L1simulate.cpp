@@ -88,11 +88,11 @@ int main(int argc, char* argv[]){
     unsigned int clock = 0;
     while(true){
         bool AllDone = true;
+        cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
                 AllDone = false;
                 if(debug){
-                    cout << "--------Clock Cycle " << clock << "----------" << endl;
                     cout << "**********Current Processor " << i << "***********" << endl;
                 }
                 processorsInWork[i]->cycle();
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]){
             cout << "Starting bus cycle" << endl;
         }
         bus.cycle();
-        if(AllDone){
+        if(AllDone || clock > 5){
             break;
         }
         else{

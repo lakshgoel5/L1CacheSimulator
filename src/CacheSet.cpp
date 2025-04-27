@@ -80,7 +80,19 @@ void CacheSet::printCacheMESIStates(){
     int i=0;
     for(auto& cacheline : cachelines_data){
         cout << "Cacheline number: " << i++ << " " << endl;
-        cout << cacheline.getState() << " " << endl;
+        MESIState state = cacheline.getState();
+        if(state == MESIState::M){
+            cout << "Cache state: M" << endl;
+        }
+        else if(state == MESIState::E){
+            cout << "Cache state: E" << endl;
+        }
+        else if(state == MESIState::S){
+            cout << "Cache state: S" << endl;
+        }
+        else if(state == MESIState::I){
+            cout << "Cache state: I" << endl;
+        }
     }
     cout << endl;
 }
