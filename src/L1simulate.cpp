@@ -4,6 +4,7 @@
 #include "headers/utils.hpp"
 #include "headers/Memory.hpp"
 #include <cmath>
+#include <cstring>
 //expand address
 // Memory address is 32-bit. If any address is less than 32 bit, assume remaining MSB to be 0
 
@@ -11,10 +12,14 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = false; // Set to true for debugging
+bool debug = true; // Set to true for debugging
 
 int main(int argc, char* argv[]){
     // Parse command line arguments
+    if(argc > 1 && strcmp(argv[1], "-h") == 0){
+        cout << "Usage: " << argv[0] << " -t <tracefile> -s <number of set index bits> -E <number of lines per set> -b <block size in bytes> -o <output file>" << endl;
+        return 0;
+    }
     if (argc != 11) { //debug
         cerr << "Try: " << argv[0] << " -h" << endl;
         return 1;
@@ -26,7 +31,7 @@ int main(int argc, char* argv[]){
     int numLines = 0;
     int blockSize = 0;
     string outputFile;
-    //trace file should be like ../assignment3_traces/app1
+    //trace file should be like app1
     for (int i = 1; i < argc; i++) {
         if (string(argv[i]) == "-t") {
             traceFile = argv[++i];
@@ -61,9 +66,9 @@ int main(int argc, char* argv[]){
     vector<Processor*> processorsInWork; //Number of processors can be variable
     Bus bus(blockSize); // bandwidth is assumed to be equal to block size for simplicity
     for(int i=0; i<NUMCORES; i++){
-        Processor processor = Processor(i, numSets, numLines, blockSize, traceFile + "_proc" + to_string(i) + ".trace", &bus);
-        bus.addProcessorToBus(&processor);
-        processorsInWork.push_back(&processor);
+        Processor* processor = new Processor(i, numSets, numLines, blockSize, "../traces/" + traceFile + "_proc" + to_string(i) + ".trace", &bus);
+        bus.addProcessorToBus(processor);
+        processorsInWork.push_back(processor);
     }
 
     unsigned int clock = 0;
