@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-bool debug_processor = false; // Set to true for debugging
+bool debug_processor = true; // Set to true for debugging
 
 Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {
@@ -55,14 +55,23 @@ void Processor::cycle() {
 
 void Processor::execute(ProcessorState state) {
     if(state == ProcessorState::FREE) {
+        if(debug_processor) {
+            cout << "Processor is in FREE state" << endl;
+        }
         // Execute the instruction
         // get the instruction from the vector, one at a time
         pair<InstructionType, unsigned int> pair = instructionList[instructionIndex];
         InstructionType instructionType = pair.first; // load,store
         unsigned int address = pair.second; // address
+        if(debug_processor) {
+            cout << "Instruction: " << (instructionType == InstructionType::LOAD ? "LOAD" : "STORE") << ", Address: " << hex << address << endl;
+        }
         // update instruction type to LOAD or STORE (required in execute_free function)
         // call execute_free function
         ProcessMESIResult result = execute_free(instructionType, address);
+        if(debug_processor) {
+            cout << "Result from execute_free: " << result << endl;
+        }
         //increment index of vector of instrcution to next if it's a hit
         //call bus with appropriate singal
         // differentiate here with the special case - write miss S
@@ -83,9 +92,15 @@ void Processor::execute(ProcessorState state) {
 
         //If I reach to end of vector of instructions, set state to done
         if(instructionIndex >= instructionList.size()) {
+            if(debug_processor) {
+                cout << "All instructions executed. Now going to Done State" << endl;
+            }
             state = ProcessorState::DONE;
         }
     } else if(state == ProcessorState::READ_MEMORY) {
+        if(debug_processor) {
+            cout << "Processor is stalled in READ_MEMORY state" << endl;
+        }
         IdleCycles++;
         // stay here until num of idle cycles = 100
 
@@ -93,6 +108,9 @@ void Processor::execute(ProcessorState state) {
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::WRITE_MEMORY) {
+        if(debug_processor) {
+            cout << "Processor is stalled in WRITE_MEMORY state" << endl;
+        }
         IdleCycles++;
         // stay here until num of idle cycles = 100
 
@@ -100,6 +118,9 @@ void Processor::execute(ProcessorState state) {
 
         //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::DONE) {
+        if(debug_processor) {
+            cout << "Processor is in DONE state" << endl;
+        }
         // Finalize the operation
         //break out of the function and return
         
