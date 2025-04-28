@@ -47,7 +47,9 @@ class Processor {
         }
         void PrintStats();
         void updateStateToFree() {
-            this->state = ProcessorState::FREE;
-            this->instructionIndex++;
+            if(this->state != ProcessorState::DONE){
+                this->state = ProcessorState::FREE;
+                this->instructionIndex++;
+            }
         }
 };
