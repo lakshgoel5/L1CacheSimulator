@@ -96,11 +96,20 @@ int main(int argc, char* argv[]){
         if(debug) cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
-                AllDone = false;
-                if(debug){
-                    cout << "**********Current Processor " << i << "***********" << endl;
+                if(!processorsInWork[i]->halted){
+                    AllDone = false;
+                    if(debug){
+                        cout << "**********Current Processor " << i << "***********" << endl;
+                    }
+                    processorsInWork[i]->cycle();
                 }
-                processorsInWork[i]->cycle();
+                else{
+                    if(debug){
+                        cout << "Processor " << i << " is halted" << endl;
+                    }
+                    processorsInWork[i]->numOfCycles++;
+                    processorsInWork[i]->IdleCycles++;
+                }
             }
         }
         if(debug){

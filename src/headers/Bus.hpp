@@ -35,5 +35,6 @@ class Bus {
         void processRDX(Request* request);
         void cycle();
         bool isDone();
+        void haltProcessor(int processorID);
 
 };

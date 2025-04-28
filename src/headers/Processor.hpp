@@ -18,6 +18,7 @@ class Processor {
         vector<pair<InstructionType, unsigned int>> instructionList; // Vector of instructions (LOAD/STORE, address) 
         int instructionIndex;
     public:
+        bool halted = false;
         int numOfCycles = 0;
         int total_instructions = 0;
         int numReads = 0;
