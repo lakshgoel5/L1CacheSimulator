@@ -28,6 +28,17 @@ int Bus::cycle(){
     //decrease it's countdown
     //if countdown = 0, then update cache line
     if(this->currentRequest == nullptr && !this->busQueue.empty()){
+        if(debug_bus){
+            cout << "Bus Queue is not empty, so taking request from queue" << endl;
+            cout << "Bus queue contains request of processor ID and address " << endl;
+            //print all processor IDs and correesponding addresses in the queue
+            queue<Request> tempQueue = busQueue;
+            while(!tempQueue.empty()){
+                Request tempRequest = tempQueue.front();
+                cout << "Processor ID: " << tempRequest.processorID << " Address: " << hex << tempRequest.address << dec << endl;
+                tempQueue.pop();
+            }
+        }
         currentRequest = &busQueue.front();
         busQueue.pop();
         processRequest(currentRequest);
