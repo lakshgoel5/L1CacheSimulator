@@ -11,3 +11,10 @@ run3:
 
 run4:
 	./L1simulate -t app4 -s 2 -E 8 -b 3 -o abcd.txt
+
+run5:
+	./L1simulate -t app5 -s 2 -E 8 -b 3 -o abcd.txt
+
+run6:
+	./L1simulate -t app6 -s 2 -E 8 -b 3 -o abcd.txt
+
