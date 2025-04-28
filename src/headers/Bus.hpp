@@ -33,7 +33,7 @@ class Bus {
         void processRequest(Request* request);
         void processRD(Request* request);
         void processRDX(Request* request);
-        void cycle();
+        int cycle();
         bool isDone();
         void haltProcessor(int processorID);
 

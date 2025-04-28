@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = false; // Set to true for debugging
+bool debug = true; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
@@ -115,12 +115,15 @@ int main(int argc, char* argv[]){
         if(debug){
             cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
         }
-        bus.cycle();
+        int jump = bus.cycle();
         if((AllDone && bus.isDone()) || clock > stop_at_cycle){
             break;
         }
-        else{
+        else if(jump ==0){
             clock++;
+        }
+        else{
+            clock += jump;
         }
     }
     cout<<endl;
