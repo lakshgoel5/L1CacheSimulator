@@ -95,7 +95,7 @@ void Processor::execute() {
         //further processing required
 
         //If I reach to end of vector of instructions, set state to done
-        if(instructionIndex >= instructionList.size()) {
+        if(instructionIndex >= instructionList.size() - 1) {
             if(debug_processor) {
                 cout << "All instructions executed. Now going to Done State" << endl;
             }
