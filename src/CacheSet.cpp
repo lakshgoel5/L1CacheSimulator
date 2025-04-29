@@ -6,7 +6,7 @@ CacheSet::CacheSet(size_t numLines, size_t blockSize){
     //Initialize list of cache lines
     this->blockSize = blockSize;
     for(size_t i = 0; i < numLines; i++){
-        cachelines_data.emplace_back(blockSize);
+        cachelines_data.emplace_back(CacheLines(blockSize));
     }
 }
 

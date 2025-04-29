@@ -1,12 +1,13 @@
 #include "headers/mesi.hpp"
 
-bool debug_mesi = false; // Set to true for debugging
+bool debug_mesi = true; // Set to true for debugging
 
 // returns whether cache hit or miss
 ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     if(debug_mesi){cout << "Starting read execution in MESI protocol" << endl; }
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
     if(debug_mesi){
+        cout<<"address is: "<<hex<<address<<dec<<endl;
         cout << "State of Cache line is : "; 
         if(mesistate == MESIState::S) { cout << "S" << endl; }
         else if(mesistate == MESIState::E) { cout << "E" << endl; }
@@ -85,7 +86,15 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
 ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     if(debug_mesi){cout << "Starting write execution in MESI protocol" << endl; }
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
-    if(debug_mesi){cout << "State of Cache line is : " << mesistate << endl; }
+    if(debug_mesi){
+        cout<<"address is: "<<hex<<address<<dec<<endl;
+        cout << "State of Cache line is : "; 
+        if(mesistate == MESIState::S) { cout << "S" << endl; }
+        else if(mesistate == MESIState::E) { cout << "E" << endl; }
+        else if(mesistate == MESIState::M) { cout << "M" << endl; }
+        else if(mesistate == MESIState::I) { cout << "I" << endl; }
+    
+    }
     // ProcessMESIResult result;
     // in shared state -> WRITE_HIT
     // send INVALIDATE request to bus -> mesi just sends request of RDX(exclusive write)
