@@ -41,11 +41,6 @@ void Cache::updateCache(unsigned int address, MESIState state, vector<int8_t> da
     cacheset_data[index].updateCacheLine(tag, state, data);
 }
 
-vector<int8_t> Cache::readblock(unsigned int address){
-    unsigned int index = getIndex(address);
-    unsigned int tag = getTag(address);
-    return cacheset_data[index].readblock(tag);
-}
 
 // index -> for identifying cache set
 void Cache::updateCacheState(unsigned int address, MESIState state){

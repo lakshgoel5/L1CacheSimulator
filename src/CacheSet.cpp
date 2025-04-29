@@ -34,15 +34,6 @@ MESIState CacheSet::getState(uint32_t tag){
     return MESIState::I; // Return INVALID state if not found
 }
 
-vector<int8_t> CacheSet::readblock(uint32_t tag){
-    for(auto& cacheline : cachelines_data){
-        if(cacheline.isValid() == true && cacheline.getTag() == tag){
-            return cacheline.readblock();
-        }
-    }
-    throw std::runtime_error("Cache line not found");
-}
-
 void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
     for(auto& cacheline : cachelines_data){
         if(cacheline.isValid() == true && cacheline.getTag() == tag){
@@ -53,20 +44,27 @@ void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
 }
 
 int CacheSet::addCacheLine(uint32_t tag, MESIState state){
-    for(auto& cacheline : cachelines_data){
-        if(cacheline.isValid() == false || cacheline.getState() == MESIState::I){
-            cacheline.setState(state);
-            cacheline.setValid(true);
-            cacheline.setTag(tag);
+    for (auto it = cachelines_data.begin(); it != cachelines_data.end(); ++it) {
+        if (!it->isValid() || it->getState() == MESIState::I) {
+            it->setState(state);
+            it->setValid(true);
+            it->setTag(tag);
+    
+            // Move this element to the front
+            cachelines_data.splice(cachelines_data.begin(), cachelines_data, it);
             return 0;
         }
     }
+    
     CacheLines& lruCacheLine = cachelines_data.back(); // Get the least recently used cache line
     MESIState lrustate = lruCacheLine.getState();
 
-    numEvictions++;
     cachelines_data.pop_back(); // Remove the least recently used cache line
+    //print cache lines data from left(front) to right (back)
     cachelines_data.emplace_front(blockSize); // Add a new cache line at the front
+    cachelines_data.front().setState(state);
+    cachelines_data.front().setValid(true);
+    cachelines_data.front().setTag(tag);
     if(lrustate == MESIState::M){
         // Handle eviction of modified block
         // Write back to memory or other cache

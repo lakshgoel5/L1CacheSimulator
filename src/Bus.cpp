@@ -76,6 +76,20 @@ int Bus::cycle(){
                     cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
                 }
                 //update cache line
+                if(debug_bus){
+                    if(currentRequest->toBeUpdatedState == MESIState::S){
+                        cout << "Current Request to be updated state: S" << endl;
+                    }
+                    else if(currentRequest->toBeUpdatedState == MESIState::E){
+                        cout << "Current Request to be updated state: E" << endl;
+                    }
+                    else if(currentRequest->toBeUpdatedState == MESIState::M){
+                        cout << "Current Request to be updated state: M" << endl;
+                    }
+                    else if(currentRequest->toBeUpdatedState == MESIState::I){
+                        cout << "Current Request to be updated state: I" << endl;
+                    }
+                }
                 this->processors[currentRequest->processorID]->halted = false;
                 processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
                 processors[currentRequest->processorID]->updateStateToFree();  // what if the last instruction is only left -> then has to be set to done
@@ -96,10 +110,27 @@ int Bus::cycle(){
                 cout << "All processors are halted, so adding counter to" << jump << endl;
             }
             currentRequest->counter = 0;
+
             this->processors[currentRequest->processorID]->halted = false;
+            //print currentrequest->tobeuodatedstate
+            if(debug_bus){
+                if(currentRequest->toBeUpdatedState == MESIState::S){
+                    cout << "Current Request to be updated state: S" << endl;
+                }
+                else if(currentRequest->toBeUpdatedState == MESIState::E){
+                    cout << "Current Request to be updated state: E" << endl;
+                }
+                else if(currentRequest->toBeUpdatedState == MESIState::M){
+                    cout << "Current Request to be updated state: M" << endl;
+                }
+                else if(currentRequest->toBeUpdatedState == MESIState::I){
+                    cout << "Current Request to be updated state: I" << endl;
+                }
+            }
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             processors[currentRequest->processorID]->updateStateToFree();
             currentRequest = nullptr;
+
             return jump;
         }
     }
@@ -274,7 +305,7 @@ void Bus::processRDX(Request* request) {
             //copy back
             processors[i]->dataTraffic += blocksize;
             if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is M aaaaa" << endl;
+                cout << "Data present in other caches, so is_present is true and state is M " << endl;
             }
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
@@ -286,17 +317,17 @@ void Bus::processRDX(Request* request) {
             if(is_present_id == -1){
                 is_present_id = i;
             }
-        }
-        if(debug_bus){
-            cout << "Data present in other caches, so is_present is true and state is";
-            if (state == MESIState::E) {
-                cout << "E" << endl;
-            }
-            else if (state == MESIState::S) {
-                cout << "S" << endl;
-            }
-            else if (state == MESIState::M){
-                cout << "M" << endl;
+            if(debug_bus){
+                cout << "Data present in other caches, so is_present is true and state is";
+                if (state == MESIState::E) {
+                    cout << "E" << endl;
+                }
+                else if (state == MESIState::S) {
+                    cout << "S" << endl;
+                }
+                else if (state == MESIState::M){
+                    cout << "M" << endl;
+                }
             }
         }
     }

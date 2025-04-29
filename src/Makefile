@@ -19,7 +19,7 @@ run6:
 	./L1simulate -t app6 -s 5 -E 2 -b 5 -o abcd.txt
 
 run7:
-	./L1simulate -t app7 -s 5 -E 5 -b 5 -o abcd.txt
+	./L1simulate -t app7 -s 5 -E 2 -b 5 -o abcd.txt
 
 #sabhya 4 2 5
 
