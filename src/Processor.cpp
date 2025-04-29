@@ -54,7 +54,6 @@ void Processor::cycle() {
         cout << "Current state of processor " << state << endl;
         //print MESI tag of each cache line
         cout << "^^^^^^Cache MESI States^^^^^^" << endl;
-        cache.printCacheMESIStates();
     }
     execute();
     //call execute function or any other if needed 

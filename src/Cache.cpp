@@ -3,6 +3,8 @@
 
 using namespace std;
 
+bool debug_cache = false;
+
 Cache::Cache(size_t numSets, size_t numLines, size_t blockSize){
     this->numSets = numSets;
     this->numLinesPerSet = numLines;
@@ -25,7 +27,7 @@ MESIState Cache::getState(unsigned int address){
 }
 
 unsigned int Cache::getIndex(unsigned int address){
-    unsigned int index = (address & indexMask) >> offsetBits;
+    unsigned int index = (address >> offsetBits) & indexMask;
     return index;
 }
 unsigned int Cache::getTag(unsigned int address){

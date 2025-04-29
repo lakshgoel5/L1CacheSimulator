@@ -52,4 +52,7 @@ class Processor {
                 this->instructionIndex++;
             }
         }
+        void printCache() {
+            cache.printCacheMESIStates();
+        }
 };

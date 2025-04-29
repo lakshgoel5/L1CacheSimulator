@@ -79,19 +79,18 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
 void CacheSet::printCacheMESIStates(){
     int i=0;
     for(auto& cacheline : cachelines_data){
-        cout << "Cacheline number: " << i++ << " " << endl;
         MESIState state = cacheline.getState();
         if(state == MESIState::M){
-            cout << "Cache state: M" << endl;
+            cout << " M ";
         }
         else if(state == MESIState::E){
-            cout << "Cache state: E" << endl;
+            cout << " E ";
         }
         else if(state == MESIState::S){
-            cout << "Cache state: S" << endl;
+            cout << " S ";
         }
         else if(state == MESIState::I){
-            cout << "Cache state: I" << endl;
+            cout << " I ";
         }
     }
     cout << endl;

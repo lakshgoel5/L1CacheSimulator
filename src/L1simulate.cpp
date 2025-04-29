@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = true; // Set to true for debugging
+bool debug = false; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
@@ -98,6 +98,12 @@ int main(int argc, char* argv[]){
         bool AllDone = true;
         if(debug) cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
+            if(debug){
+                cout << "******Cache of Processor " << i << "******" << endl;
+                cout << "Cache State: ";
+                processorsInWork[i]->printCache() ;
+                cout << endl;
+            }
             if(processorsInWork[i]->isDone() == false){
                 AllDone = false;
                 if(!processorsInWork[i]->halted){
