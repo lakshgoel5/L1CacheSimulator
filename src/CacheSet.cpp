@@ -35,9 +35,13 @@ MESIState CacheSet::getState(uint32_t tag){
 }
 
 void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
-    for(auto& cacheline : cachelines_data){
-        if(cacheline.isValid() == true && cacheline.getTag() == tag){
-            cacheline.setState(state);
+    for(auto it = cachelines_data.begin(); it != cachelines_data.end(); ++it){
+        if(it->isValid() == true && it->getTag() == tag){
+            it->setState(state);
+            //remove cacheline from that place and bring cachline to front
+            if(state != MESIState::I){
+                cachelines_data.splice(cachelines_data.begin(), cachelines_data, it);
+            }
             return;
         }
     }

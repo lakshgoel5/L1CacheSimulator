@@ -287,7 +287,7 @@ void Bus::processRDX(Request* request) {
     int blocksize = processors[request->processorID]->getBlockSize();
     bool ispresent = false;
     int is_present_id = -1;
-    for(int i=0; i<processors.size() && i!=request->processorID; i++){
+    for(int i=0; i<processors.size(); i++){
         if (i == request->processorID) {
             continue; // Skip the current processor
         }
