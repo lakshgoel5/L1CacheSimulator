@@ -135,8 +135,9 @@ void Processor::execute() {
 // returns -> 
 ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
     if(debug_processor){cout << "Starting free execution, going to MESI" << endl; }
-    ProcessMESIResult state = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
+    ProcessMESIResult state;
     if(instructionType == InstructionType::LOAD) { // read
+        ProcessMESIResult state = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
         if(state == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::READ_MEMORY;
         }
@@ -149,6 +150,7 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
         // if hit then set state to FREE
         // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
     } else if(instructionType == InstructionType::STORE) { // write
+        ProcessMESIResult state = mesiProtocol->write(this->processorID, address, *this-> bus,this->cache);
         if(state == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::WRITE_MEMORY;
         }
@@ -160,7 +162,7 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
         // if hit then set state to FREE
         // if not hit, then set state to WRITE_MEMORY, so that I can stay there for 100 cycles
     }
-    if(debug_processor){cout << "State from MESI in write: " << state << endl; }
+    // if(debug_processor){cout << "State from MESI in write: " << state << endl; }
     return state;
     
 }
@@ -192,7 +194,7 @@ void Processor::PrintStats() {
     cout << "Total Writes: " << numWrites << endl;
     cout << "Total Execution Cycles: " << numOfCycles << endl;
     cout << "Idle Cycles: " << IdleCycles << endl;
-    cout << "Cache Misses: " << numMissRate << endl;
+    cout << "Cache Misses: " << numMiss << endl;
     cout << "Cache Miss Rate: " << getMissRate() << endl;
     cout << "Cache Evictions: " << numEvictions << endl;
     cout << "Writebacks: " << numWriteBack << endl;

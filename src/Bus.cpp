@@ -73,7 +73,7 @@ int Bus::cycle(){
                 //update cache line
                 this->processors[currentRequest->processorID]->halted = false;
                 processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
-                processors[currentRequest->processorID]->updateStateToFree();
+                processors[currentRequest->processorID]->updateStateToFree();  // what if the last instruction is only left -> then has to be set to done
                 currentRequest = nullptr;
             }
             return 0;
