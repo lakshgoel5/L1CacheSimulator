@@ -9,3 +9,5 @@ L1simulate
 *.obj
 
 .vscode/
+
+L1simulate.dSYM/
