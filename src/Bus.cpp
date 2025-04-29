@@ -1,6 +1,6 @@
 #include "headers/Bus.hpp"
 
-bool debug_bus = true;
+bool debug_bus = false;
 
 Bus::Bus(int bandwidth){
     this->bandwidth = 4*bandwidth;
@@ -57,9 +57,14 @@ int Bus::cycle(){
     //     cout << "Current Request Counter: " << currentRequest->counter << endl;
     // }
     if(currentRequest != nullptr){
+        if(debug_bus){
+            cout << "current request is not null" << endl;
+            cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
+            cout << "Current Request address: " << hex << currentRequest->address << dec << endl;
+        }
         bool allHalted = true;
         for(int i=0; i<processors.size(); i++){
-            if(processors[i]->halted == false){
+            if(processors[i]->halted == false && processors[i]->isDone() == false){
                 allHalted = false;
                 break;
             }
