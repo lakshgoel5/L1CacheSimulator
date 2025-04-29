@@ -99,8 +99,8 @@ int main(int argc, char* argv[]){
         if(debug) cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
+                AllDone = false;
                 if(!processorsInWork[i]->halted){
-                    AllDone = false;
                     if(debug){
                         cout << "**********Current Processor " << i << "***********" << endl;
                     }

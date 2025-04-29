@@ -43,19 +43,19 @@ int Bus::cycle(){
         busQueue.pop();
         processRequest(currentRequest);
     }
-    if(debug_bus){
-        cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
-        cout << "Current Request transaction: ";
-        if(currentRequest->transaction == BusTransaction::MEMREAD) {
-            cout << "MEMREAD" << endl;
-        } else if(currentRequest->transaction == BusTransaction::RWITM) {
-            cout << "RWITM" << endl;
-        } else if(currentRequest->transaction == BusTransaction::INVALIDATE) {
-            cout << "INVALIDATE" << endl;
-        }
-        cout << "Address " << hex << currentRequest->address << dec << endl;
-        cout << "Current Request Counter: " << currentRequest->counter << endl;
-    }
+    // if(debug_bus){
+    //     cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
+    //     cout << "Current Request transaction: ";
+    //     if(currentRequest->transaction == BusTransaction::MEMREAD) {
+    //         cout << "MEMREAD" << endl;
+    //     } else if(currentRequest->transaction == BusTransaction::RWITM) {
+    //         cout << "RWITM" << endl;
+    //     } else if(currentRequest->transaction == BusTransaction::INVALIDATE) {
+    //         cout << "INVALIDATE" << endl;
+    //     }
+    //     cout << "Address " << hex << currentRequest->address << dec << endl;
+    //     cout << "Current Request Counter: " << currentRequest->counter << endl;
+    // }
     if(currentRequest != nullptr){
         bool allHalted = true;
         for(int i=0; i<processors.size(); i++){
@@ -200,6 +200,7 @@ void Bus::processRD(Request* request) {
             cout << "request counter before updating is " << request->counter << endl;
         }
         request->counter += 100;
+        processors[request->processorID]->dataTraffic += processors[request->processorID]->getBlockSize();
         if(debug_bus){
             cout << "request counter after updating is " << request->counter << endl;
         }
@@ -217,7 +218,7 @@ void Bus::processRD(Request* request) {
         // int n = 1<<(b-2); // debug
         request->counter += blocksize/2;
         processors[request->processorID]->dataTraffic += blocksize;
-        // this->totalBusTraffic += ;
+        this->totalBusTraffic += blocksize;
         currentRequest->toBeUpdatedState = MESIState::S;
         if(debug_bus){
             cout << "Data present in other caches, so setting counter to " << request->counter << endl;
@@ -232,6 +233,7 @@ void Bus::processRDX(Request* request) {
         cout << endl;
         cout << "Inside ProcessRDX function" << endl;
     }
+    int blocksize = processors[request->processorID]->getBlockSize();
     bool ispresent = false;
     for(int i=0; i<processors.size() && i!=request->processorID; i++){
         MESIState state = processors[i]->getCacheState(request->address);
@@ -246,6 +248,7 @@ void Bus::processRDX(Request* request) {
             if(debug_bus){
                 cout << "Data present in other caches, so is_present is true and state is M aaaaa" << endl;
             }
+            processors[request->processorID]->dataTraffic += blocksize;
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
         }
@@ -276,9 +279,9 @@ void Bus::processRDX(Request* request) {
     else if(ispresent == false){
         //read from memory
         request->counter += 100;
+        processors[request->processorID]->dataTraffic += blocksize;
     }
     else{
-        int blocksize = processors[request->processorID]->getBlockSize();
         // int n = 1<<(b-2); // debug
         request->counter += blocksize/2; //transfer
         processors[request->processorID]->dataTraffic += blocksize;

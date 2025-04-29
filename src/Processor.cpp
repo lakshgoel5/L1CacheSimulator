@@ -39,6 +39,7 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
 }
 
 void Processor::cycle() {
+    
     if(instructionIndex >= instructionList.size()) {
         if(debug_processor) {
             cout << "All instructions executed. Now going to Done State" << endl;
