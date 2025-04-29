@@ -40,6 +40,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
     else if(mesistate == MESIState::I) {
         if(debug_mesi){cout << "Read miss" << endl; }
         Request request(BusTransaction::MEMREAD, processorID, TransactionType::BUSRD, address);
+        bus.busTransactions++;
         // if bus is busy --> queue me daal // debug
         // else ---> just process the request in the bus
         if(debug_mesi){
@@ -93,6 +94,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
     if(mesistate == MESIState::S){
         if(debug_mesi){cout << "Write hit in shared state" << endl; }
         Request request(BusTransaction::INVALIDATE, processorID, TransactionType::BUSRDX, address);
+        bus.busTransactions++;
         if(debug_mesi){
             cout << "Adding request to bus queue" << endl; 
             cout << "Request type: " << request.type << endl; 
@@ -128,6 +130,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
     else if(mesistate == MESIState::I){
         if(debug_mesi){cout << "Write miss" << endl; }
         Request request(BusTransaction::RWITM, processorID, TransactionType::BUSRDX, address);
+        bus.busTransactions++;
         if(debug_mesi){
             cout << "Adding request to bus queue" << endl; 
             cout << "Request type: " << request.type << endl; 

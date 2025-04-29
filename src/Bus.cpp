@@ -150,7 +150,10 @@ void Bus::processRD(Request* request) {
     int blocksize = processors[request->processorID]->getBlockSize();
     // see other processors
     int is_present_id = -1;
-    for(int i=0; i<processors.size() && i!= request->processorID; i++){
+    for(int i=0; i<processors.size(); i++){
+        if (i == request->processorID) {
+            continue; // Skip the current processor
+        }
         MESIState state = processors[i]->getCacheState(request->address);
         if(debug_bus){
             cout << "Checking for data in Cache of Processor number " << i << endl;
@@ -199,7 +202,12 @@ void Bus::processRD(Request* request) {
     }
     //add cache line
     //.......
-    request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+    int add_line = processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+    if(add_line > 0){
+        // M state block is evicted as LRU
+        processors[request->processorID]->dataTraffic += blocksize;
+        request-> counter += add_line;
+    }
     if(ispresent == false){
         // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
@@ -244,6 +252,9 @@ void Bus::processRDX(Request* request) {
     bool ispresent = false;
     int is_present_id = -1;
     for(int i=0; i<processors.size() && i!=request->processorID; i++){
+        if (i == request->processorID) {
+            continue; // Skip the current processor
+        }
         MESIState state = processors[i]->getCacheState(request->address);
         if(debug_bus){
             cout << "Checking for data in Cache of Processor number " << i << endl;

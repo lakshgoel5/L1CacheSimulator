@@ -26,7 +26,7 @@ class Bus {
 
     public:
         int busTransactions = 0;
-        int totalBusTraffic = 0;
+        int totalBusTraffic = 0; // sum of all data traffic
         void addToQueue(Request request);
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
