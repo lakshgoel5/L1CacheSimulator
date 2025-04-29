@@ -18,3 +18,6 @@ run5:
 run6:
 	./L1simulate -t app6 -s 2 -E 8 -b 3 -o abcd.txt
 
+run7:
+	./L1simulate -t app7 -s 5 -E 2 -b 5 -o abcd.txt
+

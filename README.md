@@ -19,3 +19,5 @@ The simulator models a multi-core system with the following features:
 - LRU (Least Recently Used) replacement policy
 - Central snooping bus for inter-cache communication
 - Support for various cache configurations (sets, associativity, block size)
+
+# Project Structure
