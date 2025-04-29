@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = true; // Set to true for debugging
+bool debug = false; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
@@ -49,6 +49,7 @@ int main(int argc, char* argv[]){
     int setIndexBits = 0;
     int numLines = 0;
     int blockSize = 0;
+    int blockBits = 0;
     string outputFile;
     //trace file should be like app1
     for (int i = 1; i < argc; i++) {
@@ -59,7 +60,8 @@ int main(int argc, char* argv[]){
         } else if (string(argv[i]) == "-E") {
             numLines = stoi(argv[++i]);
         } else if (string(argv[i]) == "-b") {
-            blockSize = stoi(argv[++i]);
+            blockBits = stoi(argv[++i]);
+            blockSize = pow(2, blockBits);
         } else if (string(argv[i]) == "-o") {
             outputFile = argv[++i];
         } else if (string(argv[i]) == "-h") {
@@ -77,6 +79,7 @@ int main(int argc, char* argv[]){
         cout << "Trace File: " << traceFile << endl;
         cout << "Set Index Bits: " << setIndexBits << endl;
         cout << "Number of Lines: " << numLines << endl;
+        cout << "Block Bits: " << blockBits << endl;
         cout << "Block Size: " << blockSize << endl;
         cout << "Output File: " << outputFile << endl;
     }

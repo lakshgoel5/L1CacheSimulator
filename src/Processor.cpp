@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-bool debug_processor = true; // Set to true for debugging
+bool debug_processor = false; // Set to true for debugging
 
 Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {
@@ -91,6 +91,7 @@ void Processor::execute() {
         }
         //stay at same index if it's a miss
         else if(result == ProcessMESIResult::CACHE_MISS) {
+            cout << "Cache miss occurred *************************" << endl;
             numMiss++;
             //check if data in other caches(done in other function)
             //If in other cache, take one more cycle
@@ -135,10 +136,10 @@ void Processor::execute() {
 // returns -> 
 ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
     if(debug_processor){cout << "Starting free execution, going to MESI" << endl; }
-    ProcessMESIResult state;
+    ProcessMESIResult state1;
     if(instructionType == InstructionType::LOAD) { // read
-        ProcessMESIResult state = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
-        if(state == ProcessMESIResult::CACHE_MISS) {
+        state1 = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
+        if(state1 == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::READ_MEMORY;
         }
         // call mesi function of load
@@ -150,8 +151,8 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
         // if hit then set state to FREE
         // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
     } else if(instructionType == InstructionType::STORE) { // write
-        ProcessMESIResult state = mesiProtocol->write(this->processorID, address, *this-> bus,this->cache);
-        if(state == ProcessMESIResult::CACHE_MISS) {
+        state1 = mesiProtocol->write(this->processorID, address, *this-> bus,this->cache);
+        if(state1 == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::WRITE_MEMORY;
         }
         // call mesi function of store
@@ -163,7 +164,7 @@ ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsig
         // if not hit, then set state to WRITE_MEMORY, so that I can stay there for 100 cycles
     }
     // if(debug_processor){cout << "State from MESI in write: " << state << endl; }
-    return state;
+    return state1;
     
 }
 
@@ -188,6 +189,7 @@ int Processor::addCacheLine(unsigned int address, MESIState state) {
 }
 
 void Processor::PrintStats() {
+    numEvictions = this->cache.getnumEvictions();
     cout<<"Core "<<processorID<<" Statistics:"<<endl;
     cout << "Total Instructions: " << total_instructions << endl;
     cout << "Total Reads: " << numReads << endl;

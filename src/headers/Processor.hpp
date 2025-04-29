@@ -43,7 +43,7 @@ class Processor {
             return cache.getBlockSize();
         }
         float getMissRate(){
-            return (float)numMiss/(float)total_instructions;
+            return ((float)numMiss/(float)total_instructions)*100;
         }
         void PrintStats();
         void updateStateToFree() {

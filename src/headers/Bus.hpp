@@ -25,6 +25,8 @@ class Bus {
         Request* currentRequest;
 
     public:
+        int busTransactions = 0;
+        int totalBusTraffic = 0;
         void addToQueue(Request request);
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
