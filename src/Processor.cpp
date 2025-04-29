@@ -39,7 +39,14 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
 }
 
 void Processor::cycle() {
-    numOfCycles++; // number of cycles of that processsor 
+    if(instructionIndex >= instructionList.size()) {
+        if(debug_processor) {
+            cout << "All instructions executed. Now going to Done State" << endl;
+        }
+        this->state = ProcessorState::DONE;
+        return;
+    }
+    numOfCycles++; // number of cycles of that processsor
     //update values for stats
     //check state of processor
     if(debug_processor) {
@@ -49,20 +56,13 @@ void Processor::cycle() {
         cache.printCacheMESIStates();
     }
     execute();
-    //call execute function or any other if needed
+    //call execute function or any other if needed 
 }
 
 void Processor::execute() {
     if(state == ProcessorState::FREE) {
         if(debug_processor) {
             cout << "Processor is in FREE state" << endl;
-        }
-        if(instructionIndex >= instructionList.size()) {
-            if(debug_processor) {
-                cout << "All instructions executed. Now going to Done State" << endl;
-            }
-            this->state = ProcessorState::DONE;
-            return;
         }
         // Execute the instruction
         // get the instruction from the vector, one at a time
