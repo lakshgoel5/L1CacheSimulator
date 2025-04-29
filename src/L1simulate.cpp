@@ -130,7 +130,7 @@ int main(int argc, char* argv[]){
         }
     }
     cout<<endl;
-    printSimulationParameters(traceFile, setIndexBits, numLines, blockSize);
+    printSimulationParameters(traceFile, setIndexBits, numLines, blockBits);
     cout<<endl;
     for(int i=0; i<NUMCORES; i++){
         processorsInWork[i]->PrintStats();
