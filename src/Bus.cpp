@@ -233,6 +233,9 @@ void Bus::processRDX(Request* request) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
             //copy back
+            if(debug_bus){
+                cout << "Data present in other caches, so is_present is true and state is M aaaaa" << endl;
+            }
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
         }

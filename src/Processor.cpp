@@ -57,6 +57,13 @@ void Processor::execute() {
         if(debug_processor) {
             cout << "Processor is in FREE state" << endl;
         }
+        if(instructionIndex >= instructionList.size()) {
+            if(debug_processor) {
+                cout << "All instructions executed. Now going to Done State" << endl;
+            }
+            this->state = ProcessorState::DONE;
+            return;
+        }
         // Execute the instruction
         // get the instruction from the vector, one at a time
         pair<InstructionType, unsigned int> pair = instructionList[instructionIndex];
@@ -95,12 +102,6 @@ void Processor::execute() {
         //further processing required
 
         //If I reach to end of vector of instructions, set state to done
-        if(instructionIndex >= instructionList.size() - 1) {
-            if(debug_processor) {
-                cout << "All instructions executed. Now going to Done State" << endl;
-            }
-            this->state = ProcessorState::DONE;
-        }
     } else if(state == ProcessorState::READ_MEMORY) {
         if(debug_processor) {
             cout << "Processor is stalled in READ_MEMORY state" << endl;
