@@ -240,7 +240,7 @@ void Bus::processRDX(Request* request) {
         }
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            processors[request->processorID]->numBusInvalidate++; // sends an invalidate signal to the bus
+            processors[request->processorID]->numBusInvalidate++; // sends an invalidate signal to the bus // debug this should be counted only once
             ispresent = true;
             //copy back
             if(debug_bus){
