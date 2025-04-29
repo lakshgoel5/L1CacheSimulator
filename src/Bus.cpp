@@ -1,6 +1,6 @@
 #include "headers/Bus.hpp"
 
-bool debug_bus = false;
+bool debug_bus = true;
 
 Bus::Bus(int bandwidth){
     this->bandwidth = 4*bandwidth;
@@ -157,7 +157,6 @@ void Bus::processRD(Request* request) {
         if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
-            processors[i]->numBusInvalidate++;
             if(debug_bus){
                 cout << "Data present in other caches, so is_present is true and state is";
                 if (state == MESIState::E) {
@@ -173,7 +172,6 @@ void Bus::processRD(Request* request) {
         else if(state == MESIState::M){
             ispresent = true;
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
-            processors[i]->numBusInvalidate++;
             //copy back
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
@@ -218,7 +216,7 @@ void Bus::processRD(Request* request) {
         int blocksize = processors[request->processorID]->getBlockSize();
         // int n = 1<<(b-2); // debug
         request->counter += blocksize/2;
-        processors[request->processorID]->dataTraffic += blocksize/2;
+        processors[request->processorID]->dataTraffic += blocksize;
         // this->totalBusTraffic += ;
         currentRequest->toBeUpdatedState = MESIState::S;
         if(debug_bus){
@@ -242,7 +240,7 @@ void Bus::processRDX(Request* request) {
         }
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            processors[i]->numBusInvalidate++;
+            processors[request->processorID]->numBusInvalidate++; // sends an invalidate signal to the bus
             ispresent = true;
             //copy back
             if(debug_bus){
@@ -253,7 +251,7 @@ void Bus::processRDX(Request* request) {
         }
         else if(state == MESIState::S || state == MESIState::E) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            processors[i]->numBusInvalidate++;
+            processors[request->processorID]->numBusInvalidate++;  // sends an invalidate signal to the bus
             ispresent = true;
         }
         if(debug_bus){
@@ -280,11 +278,11 @@ void Bus::processRDX(Request* request) {
         request->counter += 100;
     }
     else{
-        int b = processors[request->processorID]->getBlockSize();
-        int n = 1<<(b-2); // debug
-        request->counter += 2*n; //transfer
-        processors[request->processorID]->dataTraffic += 2*n;
-        this->totalBusTraffic += n;
+        int blocksize = processors[request->processorID]->getBlockSize();
+        // int n = 1<<(b-2); // debug
+        request->counter += blocksize/2; //transfer
+        processors[request->processorID]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
     }
 }
 

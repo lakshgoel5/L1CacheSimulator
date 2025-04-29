@@ -91,7 +91,6 @@ void Processor::execute() {
         }
         //stay at same index if it's a miss
         else if(result == ProcessMESIResult::CACHE_MISS) {
-            cout << "Cache miss occurred *************************" << endl;
             numMiss++;
             //check if data in other caches(done in other function)
             //If in other cache, take one more cycle
