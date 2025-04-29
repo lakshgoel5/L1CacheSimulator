@@ -73,7 +73,7 @@ int Bus::cycle(){
                 //update cache line
                 this->processors[currentRequest->processorID]->halted = false;
                 processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
-                processors[currentRequest->processorID]->updateStateToFree();
+                processors[currentRequest->processorID]->updateStateToFree();  // what if the last instruction is only left -> then has to be set to done
                 currentRequest = nullptr;
             }
             return 0;
@@ -226,9 +226,16 @@ void Bus::processRD(Request* request) {
 // handling simultaneous reads/writes to the same memory address - left
 
 void Bus::processRDX(Request* request) {
+    if(debug_bus){
+        cout << endl;
+        cout << "Inside ProcessRDX function" << endl;
+    }
     bool ispresent = false;
     for(int i=0; i<processors.size() && i!=request->processorID; i++){
         MESIState state = processors[i]->getCacheState(request->address);
+        if(debug_bus){
+            cout << "Checking for data in Cache of Processor number " << i << endl;
+        }
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
@@ -242,6 +249,17 @@ void Bus::processRDX(Request* request) {
         else if(state == MESIState::S || state == MESIState::E) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
+        }
+        if(debug_bus){
+            cout << "Data present in other caches, so is_present is true and state is";
+            if (state == MESIState::E) {
+                cout << "E" << endl;
+            }
+            else if (state == MESIState::S) {
+                cout << "S" << endl;
+            }
+            else if (state == MESIState::M)
+                cout << "M" << endl;
         }
     }
     request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
