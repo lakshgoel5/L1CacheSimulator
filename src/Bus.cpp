@@ -23,11 +23,22 @@ void Bus::BusWrite() {
     // It should handle the data transfer and update the state of the processors accordingly
 }
 
-void Bus::cycle(){
+int Bus::cycle(){
     //take element from ques
     //decrease it's countdown
     //if countdown = 0, then update cache line
     if(this->currentRequest == nullptr && !this->busQueue.empty()){
+        if(debug_bus){
+            cout << "Bus Queue is not empty, so taking request from queue" << endl;
+            cout << "Bus queue contains request of processor ID and address " << endl;
+            //print all processor IDs and correesponding addresses in the queue
+            queue<Request> tempQueue = busQueue;
+            while(!tempQueue.empty()){
+                Request tempRequest = tempQueue.front();
+                cout << "Processor ID: " << tempRequest.processorID << " Address: " << hex << tempRequest.address << dec << endl;
+                tempQueue.pop();
+            }
+        }
         currentRequest = &busQueue.front();
         busQueue.pop();
         processRequest(currentRequest);
@@ -46,17 +57,48 @@ void Bus::cycle(){
         cout << "Current Request Counter: " << currentRequest->counter << endl;
     }
     if(currentRequest != nullptr){
-        currentRequest->counter--;
-        if(currentRequest->counter == 0){
-            if(debug_bus){
-                cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
+        bool allHalted = true;
+        for(int i=0; i<processors.size(); i++){
+            if(processors[i]->halted == false){
+                allHalted = false;
+                break;
             }
-            //update cache line
+        }
+        if(!allHalted){
+            currentRequest->counter--;
+            if(currentRequest->counter == 0){
+                if(debug_bus){
+                    cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
+                }
+                //update cache line
+                this->processors[currentRequest->processorID]->halted = false;
+                processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
+                processors[currentRequest->processorID]->updateStateToFree();
+                currentRequest = nullptr;
+            }
+            return 0;
+        }
+        else{
+            int jump = currentRequest->counter;
+            for(int i=0; i<processors.size(); i++){
+                if(processors[i]->isDone() == false){
+                    processors[i]->numOfCycles += jump; //+1 coz it was added in the for loop before starting cycle of bus
+                    processors[i]->IdleCycles += jump; //same reson
+                    //if you remove -1, you will get how many times all 4 processors are simultaneously halted
+                }
+            }
+            if(debug_bus){
+                cout << "All processors are halted, so adding counter to" << jump << endl;
+            }
+            currentRequest->counter = 0;
+            this->processors[currentRequest->processorID]->halted = false;
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             processors[currentRequest->processorID]->updateStateToFree();
             currentRequest = nullptr;
+            return jump;
         }
     }
+    return 0;
 }
 
 void Bus::processRequest(Request* request) {
@@ -107,7 +149,7 @@ void Bus::processRD(Request* request) {
     }
 
     // see other processors
-    for(int i=0; i<processors.size(); i++){
+    for(int i=0; i<processors.size() && i!= request->processorID; i++){
         MESIState state = processors[i]->getCacheState(request->address);
         if(debug_bus){
             cout << "Checking for data in Cache of Processor number " << i << endl;
@@ -185,12 +227,15 @@ void Bus::processRD(Request* request) {
 
 void Bus::processRDX(Request* request) {
     bool ispresent = false;
-    for(int i=0; i<processors.size() && i!=request->processorID && i!=request->processorID; i++){
+    for(int i=0; i<processors.size() && i!=request->processorID; i++){
         MESIState state = processors[i]->getCacheState(request->address);
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
             //copy back
+            if(debug_bus){
+                cout << "Data present in other caches, so is_present is true and state is M aaaaa" << endl;
+            }
             request->counter += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
         }
@@ -201,14 +246,18 @@ void Bus::processRDX(Request* request) {
     }
     request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
     currentRequest->toBeUpdatedState = MESIState::M;
-    if(ispresent == false){
+    if(request->transaction == BusTransaction::INVALIDATE){
+        //just send Invalidate and write on it
+        request->counter += 1;
+    }
+    else if(ispresent == false){
         //read from memory
         request->counter += 100;
     }
     else{
         int b = processors[request->processorID]->getBlockSize();
         int n = 1<<(b-2); // debug
-        request->counter += 2*n;
+        request->counter += 2*n; //transfer
     }
 }
 
@@ -218,4 +267,8 @@ void Bus::addToQueue(Request request) {
 
 bool Bus::isDone() {
     return busQueue.empty() && currentRequest == nullptr;
+}
+
+void Bus::haltProcessor(int processorID){
+    this->processors[processorID]->halted = true;
 }

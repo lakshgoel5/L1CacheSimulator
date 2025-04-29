@@ -66,6 +66,7 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
             } 
         }
         bus.addToQueue(request);
+        bus.haltProcessor(processorID);
         //updatecachestate done inside this request
         return CACHE_MISS;
         /*
@@ -100,6 +101,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
             cout << "Bus transaction type: " << request.transaction << endl; 
         }
         bus.addToQueue(request);
+        bus.haltProcessor(processorID);
         //updatecache inside processRDX
         return CACHE_HIT;
     }
@@ -134,6 +136,7 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
             cout << "Bus transaction type: " << request.transaction << endl; 
         }
         bus.addToQueue(request);
+        bus.haltProcessor(processorID);
         //updatecache inside processRDX
         return CACHE_MISS;
     }

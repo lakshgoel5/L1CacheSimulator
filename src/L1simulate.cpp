@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = false; // Set to true for debugging
+bool debug = true; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
@@ -93,25 +93,37 @@ int main(int argc, char* argv[]){
     unsigned int clock = 0;
     while(true){
         bool AllDone = true;
-        cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
+        if(debug) cout << "---------------------------------Clock Cycle " << clock << "----------------------------------" << endl;
         for(int i=0; i<NUMCORES; i++){
             if(processorsInWork[i]->isDone() == false){
-                AllDone = false;
-                if(debug){
-                    cout << "**********Current Processor " << i << "***********" << endl;
+                if(!processorsInWork[i]->halted){
+                    AllDone = false;
+                    if(debug){
+                        cout << "**********Current Processor " << i << "***********" << endl;
+                    }
+                    processorsInWork[i]->cycle();
                 }
-                processorsInWork[i]->cycle();
+                else{
+                    if(debug){
+                        cout << "Processor " << i << " is halted" << endl;
+                    }
+                    processorsInWork[i]->numOfCycles++;
+                    processorsInWork[i]->IdleCycles++;
+                }
             }
         }
         if(debug){
             cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
         }
-        bus.cycle();
+        int jump = bus.cycle();
         if((AllDone && bus.isDone()) || clock > stop_at_cycle){
             break;
         }
-        else{
+        else if(jump ==0){
             clock++;
+        }
+        else{
+            clock += jump;
         }
     }
     cout<<endl;
