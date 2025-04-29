@@ -19,11 +19,11 @@ void printSimulationParameters(string tracePrefix, int setIndexBits, int Associa
     cout << "Set Index Bits: " << setIndexBits << endl;
     cout << "Associativity: " << Associativity << endl;
     cout << "Block Bits: " << blockBits << endl;
-    cout << "Block Size: " << (1<<blockBits) << endl;
+    cout << "Block Size (Bytes): " << (1<<blockBits) << endl;
     cout << "Number of sets: " << (1<<setIndexBits) << endl;
     // numsets*associativity*block size
-    int cacheSize = (1<<setIndexBits) * Associativity * (1<<blockBits);
-    cout << "Cache size: " << cacheSize/1024 << endl;
+    float cacheSize = (1<<setIndexBits) * Associativity * (1<<blockBits);
+    cout << "Cache size (KB per core): " << cacheSize/1024 << endl;
     cout << "Mesi Protocol: Enabled"<<endl;
     cout << "Write Policy: Write-back, Write-allocate"<<endl;
     cout << "Replacement Policy: LRU" << endl;
