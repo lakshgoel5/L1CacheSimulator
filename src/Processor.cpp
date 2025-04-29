@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-bool debug_processor = false; // Set to true for debugging
+bool debug_processor = true; // Set to true for debugging
 
 Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus)
     : processorID(processorID), numOfCycles(0), state(ProcessorState::FREE), cache(numSets, numLines, blockSize) {

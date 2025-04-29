@@ -1,6 +1,6 @@
 #include "headers/Bus.hpp"
 
-bool debug_bus = false;
+bool debug_bus = true;
 
 Bus::Bus(int bandwidth){
     this->bandwidth = 4*bandwidth;
