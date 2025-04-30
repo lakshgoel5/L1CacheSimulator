@@ -30,6 +30,9 @@ our1:
 our2:
 	./L1simulate -t our2 -s 2 -E 2 -b 5 -o our2.txt
 
+our3:
+	./L1simulate -t our3 -s 2 -E 1 -b 5 -o our3_1.txt
+
 false1:
 	./L1simulate -t false1 -s 5 -E 1 -b 5 -o false1.txt
 
