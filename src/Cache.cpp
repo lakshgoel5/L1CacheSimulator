@@ -11,10 +11,10 @@ Cache::Cache(size_t numSets, size_t numLines, size_t blockSize){
     this->blockSize = blockSize;
     this->cacheset_data.resize(numSets, CacheSet(numLines, blockSize));
 
-    this-> offsetBits = log2(blockSize);
-    this->indexBits = log2(numSets);
+    this-> offsetBits = __builtin_ctz((unsigned)blockSize);
+    this->indexBits = __builtin_ctz((unsigned)numSets);
     this->tagBits = 32 - (offsetBits + indexBits);
-    this->indexMask = (1 << indexBits) - 1;
+    this->indexMask = (1u << indexBits) - 1;
 }
 
 // processes address

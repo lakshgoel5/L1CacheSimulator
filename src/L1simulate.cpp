@@ -12,7 +12,7 @@ using namespace std;
 
 #define NUMCORES 4
 
-bool debug = true; // Set to true for debugging
+bool debug = false; // Set to true for debugging
 void printSimulationParameters(string tracePrefix, int setIndexBits, int Associativity, int blockBits) {
     cout << "Simulation Parameters:" << endl;
     cout << "Trace File: " << tracePrefix << endl;
