@@ -23,6 +23,13 @@ void Bus::BusWrite() {
     // It should handle the data transfer and update the state of the processors accordingly
 }
 
+long long Bus::getBusTraffic() {
+    totalBusTraffic = 0;
+    for(int i=0; i<processors.size(); i++){
+        totalBusTraffic += processors[i]->dataTraffic;
+    }
+    return totalBusTraffic;
+}
 int Bus::cycle(){
     //take element from ques
     //decrease it's countdown
@@ -349,6 +356,7 @@ void Bus::processRDX(Request* request) {
     else{
         // int n = 1<<(b-2); // debug
         request->counter += blocksize/2; //transfer
+        processors[request->processorID]->numBusInvalidate++;
         processors[request->processorID]->dataTraffic += blocksize;
         processors[is_present_id]->dataTraffic += blocksize;
         this->totalBusTraffic += blocksize;

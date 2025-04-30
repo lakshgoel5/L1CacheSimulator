@@ -142,5 +142,8 @@ int main(int argc, char* argv[]){
         processorsInWork[i]->PrintStats();
         cout<<endl;
     }
+    cout << "Overall Bus Summary:" << endl;
+    cout << "Total Bus Transactions: " << bus.busTransactions << endl;
+    cout << "Total Bus Traffic (Bytes): " << bus.getBusTraffic() << endl;
     return 0;
 }

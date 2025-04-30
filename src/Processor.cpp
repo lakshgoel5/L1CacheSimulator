@@ -1,6 +1,7 @@
 #include "headers/Processor.hpp"
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 bool debug_processor = false; // Set to true for debugging
 
@@ -196,7 +197,7 @@ void Processor::PrintStats() {
     cout << "Total Execution Cycles: " << numOfCycles << endl;
     cout << "Idle Cycles: " << IdleCycles << endl;
     cout << "Cache Misses: " << numMiss << endl;
-    cout << "Cache Miss Rate: " << getMissRate() <<"%"<< endl;
+    cout << "Cache Miss Rate: " << std::setprecision(3) << getMissRate() <<"%"<< endl;
     cout << "Cache Evictions: " << numEvictions << endl;
     cout << "Writebacks: " << getNumWriteBack() << endl;
     cout << "Bus Invalidations: " << numBusInvalidate << endl;

@@ -25,8 +25,8 @@ class Bus {
         Request* currentRequest;
 
     public:
-        int busTransactions = 0;
-        int totalBusTraffic = 0; // sum of all data traffic
+        long long busTransactions = 0;
+        long long totalBusTraffic = 0; // sum of all data traffic
         void addToQueue(Request request);
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
@@ -38,5 +38,5 @@ class Bus {
         int cycle();
         bool isDone();
         void haltProcessor(int processorID);
-
+        long long getBusTraffic();
 };

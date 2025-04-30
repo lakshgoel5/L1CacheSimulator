@@ -114,7 +114,6 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
         bus.addToQueue(request);
         bus.haltProcessor(processorID);
         //updatecache inside processRDX
-        cache.updateCacheState(address, MESIState::M);
         return CACHE_HIT;
     }
 
