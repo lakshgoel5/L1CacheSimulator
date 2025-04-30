@@ -108,5 +108,5 @@ void CacheSet::printCacheMESIStates(){
             cout << " I ";
         }
     }
-    cout << endl;
+    cout << " ";
 }

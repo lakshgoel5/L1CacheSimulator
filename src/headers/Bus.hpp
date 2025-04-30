@@ -20,7 +20,6 @@ class Request; // Forward declaration
 class Bus {
     private:
         vector<Processor*> processors;
-        queue<Request> busQueue;
         int bandwidth;
         Request* currentRequest;
 
@@ -39,4 +38,5 @@ class Bus {
         long long getBusTraffic();
         long long maxExecutionTime();
         bool otherBack(int i);
+        queue<Request> busQueue;
 };
