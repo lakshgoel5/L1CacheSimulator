@@ -211,3 +211,64 @@ Consider two processors P0 and P1 accessing the same memory address:
 This example demonstrates how the MESI protocol maintains cache coherence across multiple processors while optimizing performance by reducing unnecessary memory accesses.
 
 ## Assumptions
+
+### Core and Instructions
+- The simulation models a quad-core processor system, with each core having a private, exclusive L1 data cache.
+- There is no shared cache.
+- Each memory access is treated as one instruction.
+- There are no arithmetic or control instructions; only memory references are simulated.
+
+### Processor Execution
+- A core advances its instruction counter only when the current instruction is completed.
+- If a stall occurs due to a cache miss or bus unavailability, the instruction is not counted as complete until data is available and the memory operation is resolved.
+
+### Bus Arbitration
+- There is a single shared bus.
+- All data transfers between caches and memory occur through this bus.
+- Only one core can use the bus at a time (i.e., only one request is processed at a time).
+- We have a queueing model, where all requests are queued and completed according to cache access latency.
+- While a processor's request is queued, that processor cannot move to the next instruction until its request is completed.
+
+### Cache Miss Handling
+1. First, the bus checks if there is a valid copy (M, E, or S) in other caches. If found, a cache-to-cache transfer is initiated with a state change of other caches according to remotely initiated changes.
+2. If not found, data is read from memory. Once data arrives, it is inserted into the cache using the LRU replacement policy.
+3. The entire process can take at most 100 (for write-back in case of M) + 2*N + 100 (LRU replacement in case of M) cycles, of which:
+   - First 100 are counted in IdleCycles
+   - Next 2*N + 100 in execution cycles
+
+### Eviction and Replacement
+- When a cache set is full, the least recently used block is selected for replacement.
+- Evictions are only counted when a valid block (in M, E, or S state) is replaced.
+- Evicting a block in Invalid state is treated as a no-op and not counted as an eviction.
+
+### Write Policy
+- The simulator uses a write-back, write-allocate policy.
+- On a write miss, a cache block is fetched into the cache before writing.
+- Updates are only propagated to memory when the block is evicted.
+
+### Initial State and Tags
+- Initially, the Valid variable of cache lines is set to false (i.e., no data present).
+- The state of each cacheline is considered Invalid.
+- No cache-warmup is implemented.
+
+### Halt Modeling
+1. The processor must halt to complete its request under the following conditions:
+   - Cache Miss
+   - Write Hit (with data in S state) and Bus is busy
+2. If the processor is halted, no changes are made to the processor (cycle of processor not called) other than updating its Execution Cycle and Idle Cycles.
+3. A processor is un-halted if its request is completed, and it then moves to the next instruction.
+
+### Jump Modeling
+- If all the processors are halted, we consider it as a Jump.
+- We jump the number of cycles by the amount of time left for the top request to be executed.
+- ExecutionCycles and IdleCycles of all processors are also updated accordingly.
+
+### Trace Completion
+- Once a core finishes all its instructions, it no longer contributes to simulation cycles.
+- Its idle and execution counters are no longer updated, and it is considered "done."
+
+### Idle Cycle vs Execution Cycle
+- Whenever the core is waiting for resources, it is considered an Idle Cycle. For example:
+  1. Core wants to send a request to the bus, but the bus is processing a request from another cache.
+  2. In its own request, the core is taking data from another cache that was in M state, so writing back that data to memory is counted in Idle Cycles of this processor.
+- If the core is processing its own request, it is considered in ExecutionCycles. This also includes evicting its own cache due to the LRU policy.
