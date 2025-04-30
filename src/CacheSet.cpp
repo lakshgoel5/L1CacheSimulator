@@ -49,7 +49,19 @@ void CacheSet::updateCacheLineState(uint32_t tag, MESIState state){
 
 int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     for (auto it = cachelines_data.begin(); it != cachelines_data.end(); ++it) {
-        if (!it->isValid() || it->getState() == MESIState::I) {
+        if (!it->isValid()) {
+            it->setState(state);
+            it->setValid(true);
+            it->setTag(tag);
+    
+            // Move this element to the front
+            cachelines_data.splice(cachelines_data.begin(), cachelines_data, it);
+            return 0;
+        }
+    }
+
+    for (auto it = cachelines_data.begin(); it != cachelines_data.end(); ++it) {
+        if (it->getState() == MESIState::I) {
             it->setState(state);
             it->setValid(true);
             it->setTag(tag);
