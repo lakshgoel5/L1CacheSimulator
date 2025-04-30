@@ -1,6 +1,8 @@
 #include "headers/Bus.hpp"
+#include <algorithm>
 
 bool debug_bus = false;
+
 
 Bus::Bus(int bandwidth){
     this->bandwidth = 4*bandwidth;
@@ -364,6 +366,15 @@ long long Bus::getBusTraffic() {
     return totalBusTraffic;
 }
 
+long long Bus::maxExecutionTime() {
+    long long maxTime = 0;
+    for(int i=0; i<processors.size(); i++){
+        if(processors[i]->numOfCycles > maxTime){
+            maxTime = std::max(maxTime, static_cast<long long>(processors[i]->numOfCycles));
+        }
+    }
+    return maxTime;
+}
 bool Bus::otherBack(int i){
     if (!busQueue.empty()) {
         if( busQueue.front().processorID == i){

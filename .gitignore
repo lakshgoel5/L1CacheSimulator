@@ -11,3 +11,5 @@ L1simulate
 .vscode/
 
 L1simulate.dSYM/
+src/cache_study.py
+src/abcd.txt

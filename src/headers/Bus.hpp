@@ -37,5 +37,6 @@ class Bus {
         bool isDone();
         void haltProcessor(int processorID);
         long long getBusTraffic();
+        long long maxExecutionTime();
         bool otherBack(int i);
 };

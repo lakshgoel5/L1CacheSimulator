@@ -5,6 +5,7 @@
 #include "headers/Memory.hpp"
 #include <cmath>
 #include <cstring>
+#include <fstream>
 //expand address
 // Memory address is 32-bit. If any address is less than 32 bit, assume remaining MSB to be 0
 
@@ -138,7 +139,9 @@ int main(int argc, char* argv[]){
         }
     }
     //Print stats
-    cout<<endl;
+    std::streambuf* originalCoutBuffer = std::cout.rdbuf();  // Save original buffer
+    std::ofstream out(outputFile);
+    std::cout.rdbuf(out.rdbuf());  // Redirect cout to file
     printSimulationParameters(traceFile, setIndexBits, numLines, blockBits);
     cout<<endl;
     
@@ -149,5 +152,6 @@ int main(int argc, char* argv[]){
     cout << "Overall Bus Summary:" << endl;
     cout << "Total Bus Transactions: " << bus.busTransactions << endl;
     cout << "Total Bus Traffic (Bytes): " << bus.totalBusTraffic << endl;
+    std::cout.rdbuf(originalCoutBuffer);  // Restore cout to terminal
     return 0;
 }
