@@ -115,9 +115,11 @@ int main(int argc, char* argv[]){
                     if(debug){cout << "Processor " << i << " is halted" << endl;}
                     if(!bus.otherBack(i)){
                         processorsInWork[i]->numOfCycles++;
+                        if(debug){cout << "num in halt 333333333333333333333333 " << processorsInWork[i]->numOfCycles << endl;}
                     }
                     else{
                         processorsInWork[i]->IdleCycles++;
+                        if(debug){cout << "idle in halt 44444444444444444444444 " << processorsInWork[i]->IdleCycles<< endl;}
                     }
                 }
             }

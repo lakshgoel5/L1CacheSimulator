@@ -45,13 +45,7 @@ void Processor::cycle() {
         this->state = ProcessorState::DONE;
         return;
     }
-    if(!bus->otherBack(processorID)){
-        numOfCycles++;
-    }
-    else{
-        IdleCycles++;
-    }
-    if(debug_processor) {cout << "Current state of processor " << state << endl;cout << "^^^^^^Cache MESI States^^^^^^" << endl;}
+    numOfCycles++;
     execute();
 }
 
