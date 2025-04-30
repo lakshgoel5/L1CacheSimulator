@@ -22,5 +22,5 @@ run7:
 	./L1simulate -t app7 -s 5 -E 2 -b 5 -o abcd.txt
 
 run8:
-	./L1simulate -t app8 -s 5 -E 2 -b 5 -o abcd.txt
+	./L1simulate -t app8 -s 6 -E 2 -b 5 -o abcd.txt
 

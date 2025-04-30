@@ -7,45 +7,22 @@ Bus::Bus(int bandwidth){
     this->currentRequest = nullptr;
 }
 
-void Bus::addProcessorToBus(Processor* processor) {
-    processors.push_back(processor);
-}
-
-void Bus::BusRead() {
-    // Implement the logic for bus read operation
-    // This function will be called when a processor wants to read data from the bus
-    // It should handle the data transfer and update the state of the processors accordingly
-}
-
-void Bus::BusWrite() {
-    // Implement the logic for bus write operation
-    // This function will be called when a processor wants to write data to the bus
-    // It should handle the data transfer and update the state of the processors accordingly
-}
-
-long long Bus::getBusTraffic() {
-    totalBusTraffic = 0;
-    for(int i=0; i<processors.size(); i++){
-        totalBusTraffic += processors[i]->dataTraffic;
-    }
-    return totalBusTraffic;
-}
 int Bus::cycle(){
     //take element from ques
     //decrease it's countdown
     //if countdown = 0, then update cache line
     if(this->currentRequest == nullptr && !this->busQueue.empty()){
-        if(debug_bus){
-            cout << "Bus Queue is not empty, so taking request from queue" << endl;
-            cout << "Bus queue contains request of processor ID and address " << endl;
-            //print all processor IDs and correesponding addresses in the queue
-            queue<Request> tempQueue = busQueue;
-            while(!tempQueue.empty()){
-                Request tempRequest = tempQueue.front();
-                cout << "Processor ID: " << tempRequest.processorID << " Address: " << hex << tempRequest.address << dec << endl;
-                tempQueue.pop();
-            }
-        }
+        // if(debug_bus){
+        //     cout << "Bus Queue is not empty, so taking request from queue" << endl;
+        //     cout << "Bus queue contains request of processor ID and address " << endl;
+        //     //print all processor IDs and correesponding addresses in the queue
+        //     queue<Request> tempQueue = busQueue;
+        //     while(!tempQueue.empty()){
+        //         Request tempRequest = tempQueue.front();
+        //         cout << "Processor ID: " << tempRequest.processorID << " Address: " << hex << tempRequest.address << dec << endl;
+        //         tempQueue.pop();
+        //     }
+        // }
         currentRequest = &busQueue.front();
         busQueue.pop();
         processRequest(currentRequest);
@@ -64,11 +41,11 @@ int Bus::cycle(){
     //     cout << "Current Request Counter: " << currentRequest->counter << endl;
     // }
     if(currentRequest != nullptr){
-        if(debug_bus){
-            cout << "current request is not null" << endl;
-            cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
-            cout << "Current Request address: " << hex << currentRequest->address << dec << endl;
-        }
+        // if(debug_bus){
+        //     cout << "current request is not null" << endl;
+        //     cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
+        //     cout << "Current Request address: " << hex << currentRequest->address << dec << endl;
+        // }
         bool allHalted = true;
         for(int i=0; i<processors.size(); i++){
             if(processors[i]->halted == false && processors[i]->isDone() == false){
@@ -76,34 +53,39 @@ int Bus::cycle(){
                 break;
             }
         }
+
+        //if all are not halted, go cycle by cycle
         if(!allHalted){
             currentRequest->counter--;
+
             if(currentRequest->counter == 0){
-                if(debug_bus){
-                    cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
-                }
-                //update cache line
-                if(debug_bus){
-                    if(currentRequest->toBeUpdatedState == MESIState::S){
-                        cout << "Current Request to be updated state: S" << endl;
-                    }
-                    else if(currentRequest->toBeUpdatedState == MESIState::E){
-                        cout << "Current Request to be updated state: E" << endl;
-                    }
-                    else if(currentRequest->toBeUpdatedState == MESIState::M){
-                        cout << "Current Request to be updated state: M" << endl;
-                    }
-                    else if(currentRequest->toBeUpdatedState == MESIState::I){
-                        cout << "Current Request to be updated state: I" << endl;
-                    }
-                }
+                // if(debug_bus){
+                //     cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
+                //     if(currentRequest->toBeUpdatedState == MESIState::S){
+                //         cout << "Current Request to be updated state: S" << endl;
+                //     }
+                //     else if(currentRequest->toBeUpdatedState == MESIState::E){
+                //         cout << "Current Request to be updated state: E" << endl;
+                //     }
+                //     else if(currentRequest->toBeUpdatedState == MESIState::M){
+                //         cout << "Current Request to be updated state: M" << endl;
+                //     }
+                //     else if(currentRequest->toBeUpdatedState == MESIState::I){
+                //         cout << "Current Request to be updated state: I" << endl;
+                //     }
+                // }
                 this->processors[currentRequest->processorID]->halted = false;
                 processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
                 processors[currentRequest->processorID]->updateStateToFree();  // what if the last instruction is only left -> then has to be set to done
                 currentRequest = nullptr;
             }
+
             return 0;
         }
+
+
+
+        //if halted, then jump
         else{
             int jump = currentRequest->counter;
             for(int i=0; i<processors.size(); i++){
@@ -113,27 +95,25 @@ int Bus::cycle(){
                     //if you remove -1, you will get how many times all 4 processors are simultaneously halted
                 }
             }
-            if(debug_bus){
-                cout << "All processors are halted, so adding counter to" << jump << endl;
-            }
             currentRequest->counter = 0;
 
             this->processors[currentRequest->processorID]->halted = false;
             //print currentrequest->tobeuodatedstate
-            if(debug_bus){
-                if(currentRequest->toBeUpdatedState == MESIState::S){
-                    cout << "Current Request to be updated state: S" << endl;
-                }
-                else if(currentRequest->toBeUpdatedState == MESIState::E){
-                    cout << "Current Request to be updated state: E" << endl;
-                }
-                else if(currentRequest->toBeUpdatedState == MESIState::M){
-                    cout << "Current Request to be updated state: M" << endl;
-                }
-                else if(currentRequest->toBeUpdatedState == MESIState::I){
-                    cout << "Current Request to be updated state: I" << endl;
-                }
-            }
+            // if(debug_bus){
+            //     cout << "All processors are halted, so adding counter to" << jump << endl;
+            //     if(currentRequest->toBeUpdatedState == MESIState::S){
+            //         cout << "Current Request to be updated state: S" << endl;
+            //     }
+            //     else if(currentRequest->toBeUpdatedState == MESIState::E){
+            //         cout << "Current Request to be updated state: E" << endl;
+            //     }
+            //     else if(currentRequest->toBeUpdatedState == MESIState::M){
+            //         cout << "Current Request to be updated state: M" << endl;
+            //     }
+            //     else if(currentRequest->toBeUpdatedState == MESIState::I){
+            //         cout << "Current Request to be updated state: I" << endl;
+            //     }
+            // }
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             processors[currentRequest->processorID]->updateStateToFree();
             currentRequest = nullptr;
@@ -145,42 +125,13 @@ int Bus::cycle(){
 }
 
 void Bus::processRequest(Request* request) {
-    if(!request->isToMemOrCache){
-        return; //if the request is not to memory or cache, return
-    }
     if(request->type == TransactionType::BUSRD) {
-        if(debug_bus){
-            cout << "Processing Bus Read" << endl;
-        }
+        if(debug_bus){cout << "Processing Bus Read" << endl;}
         processRD(request);
     } else if(request->type == TransactionType::BUSRDX) {
-        if(debug_bus){
-            cout << "Processing Bus RDX" << endl;
-        }
+        if(debug_bus){cout << "Processing Bus RDX" << endl;}
         processRDX(request);
     }
-    //go to each processor other than the processor passed in function
-    //go to their caches using processor->cache (point 10, snooping transactions still continue)
-    //check if the address is present in their cache(if cache not present, you get I -> do nothing as written below)
-    //if present(either M or E or S), check the state of that cache line
-
-    //if state is M, and transaction is RWITM, then set it to Invalid, along with copy back (Write_back, as well as share block to other caches so 2*n (less than 100), then other cache modifies it)
-    //(1)//if state is M, and transaction is MEMREAD, then set it to S, along with copy back (In this, write back, as well as share block to other caches so 2*n)(Why? coz 2*n less then 100 for original processor to read from mem)
-
-    //if state is S, then set it to Invalid(transaction should be invalidate) -> call write function
-    //if state S, and transaction is MEM_READ, then keep it to S -> call read function
-
-    //if state is E, and transaction is RWITM, then set it to Invalid
-    //(2)//if state is E, and transaction is MEMREAD, then set it to S
-
-    //if state is I, then do nothing
-
-    //for copy back, we have to set processor state to WRITE_MEMORY(Only if it is in free state and not doing an old read or write)(Now the question is have that prcessor executed it's present instruction or not)
-    //and then call bus write function in Processor.cpp only
-
-
-    //in case of MEM_READ or RWITM, set state to READ_MEMORY for current processor(already done by executeFree function in processor)
-
 }
 
 void Bus::processRD(Request* request) {
@@ -373,4 +324,16 @@ bool Bus::isDone() {
 
 void Bus::haltProcessor(int processorID){
     this->processors[processorID]->halted = true;
+}
+
+void Bus::addProcessorToBus(Processor* processor) {
+    processors.push_back(processor);
+}
+
+long long Bus::getBusTraffic() {
+    totalBusTraffic = 0;
+    for(int i=0; i<processors.size(); i++){
+        totalBusTraffic += processors[i]->dataTraffic;
+    }
+    return totalBusTraffic;
 }

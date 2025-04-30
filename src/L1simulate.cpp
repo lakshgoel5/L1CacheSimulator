@@ -30,12 +30,8 @@ void printSimulationParameters(string tracePrefix, int setIndexBits, int Associa
     cout << "Bus: Central snooping bus" << endl;
 }
 int main(int argc, char* argv[]){
-    unsigned long long stop_at_cycle = 1000000000000000; //default value //debug
-    if(debug){
-        cin >> stop_at_cycle;
-    }
     // Parse command line arguments
-    if(argc > 1 && strcmp(argv[1], "-h") == 0){
+    if(argc == 2 && strcmp(argv[1], "-h") == 0){
         cout << "Usage: " << argv[0] << " -t <tracefile> -s <number of set index bits> -E <number of lines per set> -b <block size in bytes> -o <output file>" << endl;
         return 0;
     }
@@ -61,7 +57,7 @@ int main(int argc, char* argv[]){
             numLines = stoi(argv[++i]);
         } else if (string(argv[i]) == "-b") {
             blockBits = stoi(argv[++i]);
-            blockSize = pow(2, blockBits);
+            blockSize = (1<<blockBits);
         } else if (string(argv[i]) == "-o") {
             outputFile = argv[++i];
         } else if (string(argv[i]) == "-h") {
@@ -86,7 +82,7 @@ int main(int argc, char* argv[]){
 
     size_t numSets = pow(2, setIndexBits);
     vector<Processor*> processorsInWork; //Number of processors can be variable
-    Bus bus(blockSize); // bandwidth is assumed to be equal to block size for simplicity
+    Bus bus(blockSize); // bandwidth is assumed to be equal to 4*block size for simplicity
     for(int i=0; i<NUMCORES; i++){
         Processor* processor = new Processor(i, numSets, numLines, blockSize, "../traces/" + traceFile + "_proc" + to_string(i) + ".trace", &bus);
         bus.addProcessorToBus(processor);
@@ -104,40 +100,45 @@ int main(int argc, char* argv[]){
                 processorsInWork[i]->printCache() ;
                 cout << endl;
             }
+            //if processor is not done, then call cycle function
             if(processorsInWork[i]->isDone() == false){
                 AllDone = false;
+                //If processor is not halted, then call cycle function
                 if(!processorsInWork[i]->halted){
-                    if(debug){
-                        cout << "**********Current Processor " << i << "***********" << endl;
-                    }
+                    if(debug){cout << "**********Current Processor " << i << "***********" << endl;}
+
                     processorsInWork[i]->cycle();
                 }
+                //Processor halted, so increment its cycles and idlecycles
                 else{
-                    if(debug){
-                        cout << "Processor " << i << " is halted" << endl;
-                    }
+                    if(debug){cout << "Processor " << i << " is halted" << endl;}
+
                     processorsInWork[i]->numOfCycles++;
                     processorsInWork[i]->IdleCycles++;
                 }
             }
         }
-        if(debug){
-            cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-        }
+        if(debug){cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Starting bus cycle^^^^^^^^^^^^^^^^^^^^^^^^" << endl;}
+        //jump is the number of cycles left for current request to be executed
         int jump = bus.cycle();
-        if((AllDone && bus.isDone()) || clock > stop_at_cycle){
+        if((AllDone && bus.isDone())){
+            //should stip only if Processor are done, and bus is empty
             break;
         }
-        else if(jump ==0){
+        else if(jump == 0){
+            //there is no jump, i.e. one of the processors is not halted
             clock++;
         }
         else{
+            //change clock cycles by jump
             clock += jump;
         }
     }
+    //Print stats
     cout<<endl;
     printSimulationParameters(traceFile, setIndexBits, numLines, blockBits);
     cout<<endl;
+    
     for(int i=0; i<NUMCORES; i++){
         processorsInWork[i]->PrintStats();
         cout<<endl;

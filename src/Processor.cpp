@@ -29,7 +29,6 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
             } else {
                 throw std::runtime_error("Invalid instruction type in trace file");
             }
-            //debug
             //Memory address is 32-bit. If any address is less than 32 bit, assume remaining MSB to be 0. E.g. the
             //address 0x817b08 is actually 0x00817b08.
             address = std::stoul(line.substr(2), nullptr, 16);
@@ -42,40 +41,33 @@ Processor::Processor(int processorID, size_t numSets, size_t numLines, size_t bl
 void Processor::cycle() {
 
     if(instructionIndex >= instructionList.size()) {
-        if(debug_processor) {
-            cout << "All instructions executed. Now going to Done State" << endl;
-        }
+        if(debug_processor) {cout << "All instructions executed. Now going to Done State" << endl;}
         this->state = ProcessorState::DONE;
         return;
     }
     numOfCycles++; // number of cycles of that processsor
-    //update values for stats
-    //check state of processor
-    if(debug_processor) {
-        cout << "Current state of processor " << state << endl;
-        //print MESI tag of each cache line
-        cout << "^^^^^^Cache MESI States^^^^^^" << endl;
-    }
+    if(debug_processor) {cout << "Current state of processor " << state << endl;cout << "^^^^^^Cache MESI States^^^^^^" << endl;}
     execute();
-    //call execute function or any other if needed 
 }
 
 void Processor::execute() {
     if(state == ProcessorState::FREE) {
-        if(debug_processor) {
-            cout << "Processor is in FREE state" << endl;
-        }
+        if(debug_processor) {cout << "Processor is in FREE state" << endl;}
         // Execute the instruction
         // get the instruction from the vector, one at a time
+
+
         pair<InstructionType, unsigned int> pair = instructionList[instructionIndex];
         InstructionType instructionType = pair.first; // load,store
         unsigned int address = pair.second; // address
-        if(debug_processor) {
-            cout << "Instruction: " << (instructionType == InstructionType::LOAD ? "LOAD" : "STORE") << ", Address: " << hex << address << dec << endl;
-        }
-        // update instruction type to LOAD or STORE (required in execute_free function)
+
+
+        if(debug_processor) {cout << "Instruction: " << (instructionType == InstructionType::LOAD ? "LOAD" : "STORE") << ", Address: " << hex << address << dec << endl;}
+
         // call execute_free function
         ProcessMESIResult result = execute_free(instructionType, address);
+
+
         if(debug_processor) {
             cout << "Result from execute_free: ";
             if(result == ProcessMESIResult::CACHE_HIT) {
@@ -84,88 +76,64 @@ void Processor::execute() {
                 cout << "CACHE_MISS" << endl;
             }
         }
+
+        //mark
         //increment index of vector of instrcution to next if it's a hit
-        //call bus with appropriate singal
         // differentiate here with the special case - write miss S
         if(result == ProcessMESIResult::CACHE_HIT) {
             instructionIndex++;
         }
         //stay at same index if it's a miss
         else if(result == ProcessMESIResult::CACHE_MISS) {
+            //in this case, instructionIndex will not be incremented after the bus request is done (inside function update state to free)
             numMiss++;
-            //check if data in other caches(done in other function)
-            //If in other cache, take one more cycle
-
-            //If not, do as written below
         }
-        //change state to read_memory or write_memory depending on R or W if I have to read from memory or writein memory
-        //call bus with approprite signal
-        //further processing required
+        //change state to read_memory or write_memory done in execute_free
 
-        //If I reach to end of vector of instructions, set state to done
     } else if(state == ProcessorState::READ_MEMORY) {
-        if(debug_processor) {
-            cout << "Processor is stalled in READ_MEMORY state" << endl;
-        }
+        if(debug_processor) {cout << "Processor is stalled in READ_MEMORY state" << endl;}
         IdleCycles++;
-        // stay here until num of idle cycles = 100
-
-        // if num of idle cycles = 100 then set state to free and read from memory update the cache value
-
-        //If I reach to end of vector of instructions, set state to done
+        //stays here until it is reading
     } else if(state == ProcessorState::WRITE_MEMORY) {
-        if(debug_processor) {
-            cout << "Processor is stalled in WRITE_MEMORY state" << endl;
-        }
+        if(debug_processor) {cout << "Processor is stalled in WRITE_MEMORY state" << endl;}
         IdleCycles++;
-        // stay here until num of idle cycles = 100
-
-        // if num of idle cycles = 100 then set state to free and write in memory update the cache value
-
-        //If I reach to end of vector of instructions, set state to done
+        // stay here until it is writing back
     } else if(state == ProcessorState::DONE) {
-        if(debug_processor) {
-            cout << "Processor is in DONE state" << endl;
-        }
+        if(debug_processor) {cout << "Processor is in DONE state" << endl;}
         // Finalize the operation
-        //break out of the function and return
-        
     }
 }
 
-// returns -> 
+/// @brief calls the mesi protocol, which decides a hit or miss
+/// @param instructionType 
+/// @param address 
+/// @return return if it's a hit or miss
 ProcessMESIResult Processor::execute_free(InstructionType instructionType, unsigned int address) {
     if(debug_processor){cout << "Starting free execution, going to MESI" << endl; }
+
     ProcessMESIResult state1;
+
     if(instructionType == InstructionType::LOAD) { // read
+        // call mesi function of load
+        // get result which is hit or miss(Other work done by MESI only)
         state1 = mesiProtocol->read(this->processorID, address, *this-> bus,this->cache);
+
+        //if miss, then FREE -> READ_MEMORY
         if(state1 == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::READ_MEMORY;
         }
-        // call mesi function of load
-        // get result which is hit or miss(Other work done by MESI only)
 
-        //if miss, I have sent bus request to read from memory or from other caches, and update cache transition to required status(updateCacheState)
-        //so no need to do anything
-
-        // if hit then set state to FREE
-        // if not hit, then set state to READ_MEMORY, so that I can stay there for 100 cycles
     } else if(instructionType == InstructionType::STORE) { // write
+        // call mesi function of store
+        // get result which is hit or miss(Other work done by MESI only)
         state1 = mesiProtocol->write(this->processorID, address, *this-> bus,this->cache);
+
+        //if miss, then FREE -> WRITE_MEMORY
         if(state1 == ProcessMESIResult::CACHE_MISS) {
             this->state = ProcessorState::WRITE_MEMORY;
         }
-        // call mesi function of store
-        // get result which is hit or miss(Other work done by MESI only)
-        //if miss, I have sent bus request to read from memory, and update cache transition to required status
-        //so no need to do anything
-
-        // if hit then set state to FREE
-        // if not hit, then set state to WRITE_MEMORY, so that I can stay there for 100 cycles
     }
-    // if(debug_processor){cout << "State from MESI in write: " << state << endl; }
     return state1;
-    
 }
 
 ProcessorState Processor::getState() {

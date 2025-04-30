@@ -2,10 +2,17 @@
 
 bool debug_mesi = false; // Set to true for debugging
 
-// returns whether cache hit or miss
+/// @brief returns whether cache hit or miss
+/// @param processorID 
+/// @param address 
+/// @param bus 
+/// @param cache 
+/// @return HIT ot MISS
 ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     if(debug_mesi){cout << "Starting read execution in MESI protocol" << endl; }
+
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
+
     if(debug_mesi){
         cout<<"address is: "<<hex<<address<<dec<<endl;
         cout << "State of Cache line is : "; 
@@ -15,58 +22,20 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
         else if(mesistate == MESIState::I) { cout << "I" << endl; }
     
     }
+
     // locally initiated changes
-
-    //In Shared state -> READ_HIT
-    //call updatecache with state = S (update chache function will set state to what we send, and send it to lru)
-
-    //In Exclusive state -> READ_HIT
-    // send E to updatecache
-
-    //in Modified state -> READ_HIT
-    // send M to updatecache
-    // case of read hit
     if(mesistate == MESIState::S || mesistate == MESIState::E || mesistate == MESIState::M) {
         if(debug_mesi){cout << "Read hit" << endl; }
         cache.updateCacheState(address, mesistate); //debug try removing this readblock
         return CACHE_HIT;
     }
 
-    //In invalid state -> READ_MISS
-    //bus request to MEMREAD -> Mesi just sends reuqest of RD(shared read)
-    //send either S or E to updatecache
-    //send E if data is not present in other caches
-    //send S if data is present in other caches //doubt put on piazza
-    // case of read miss
+    //read miss
     else if(mesistate == MESIState::I) {
         if(debug_mesi){cout << "Read miss" << endl; }
+
         Request request(BusTransaction::MEMREAD, processorID, TransactionType::BUSRD, address);
         bus.busTransactions++;
-        // if bus is busy --> queue me daal // debug
-        // else ---> just process the request in the bus
-        if(debug_mesi){
-            cout << "Adding request to bus queue" << endl; 
-            cout << "Request type: ";
-            if(request.type == TransactionType::BUSRD) { 
-                cout << "BUSRD" << endl; 
-            }
-            else if(request.type == TransactionType::BUSRDX) {
-                cout << "BUSRDX" << endl; 
-            }
-            else { cout << "Unknown" << endl; }
-            cout << "Request address: " << hex << request.address << dec << endl;
-            cout << "Request processor ID: " << request.processorID << endl; 
-            cout << "Bus transaction type: ";
-            if(request.transaction == BusTransaction::MEMREAD) { 
-                cout << "MEMREAD" << endl; 
-            }
-            else if(request.transaction == BusTransaction::RWITM) {
-                cout << "RWITM" << endl; 
-            }
-            else if(request.transaction == BusTransaction::INVALIDATE) {
-                cout << "INVALIDATE" << endl;
-            } 
-        }
         bus.addToQueue(request);
         bus.haltProcessor(processorID);
         //updatecachestate done inside this request
@@ -80,12 +49,13 @@ ProcessMESIResult MESIProtocol::read(int processorID, unsigned int address, Bus&
     else{
         throw runtime_error("invalid state");
     }
-    // return result;
 }
 
 ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus& bus, Cache& cache) {
     if(debug_mesi){cout << "Starting write execution in MESI protocol" << endl; }
+
     MESIState mesistate = cache.getState(address);//if data is not present in cache, return invalid state
+
     if(debug_mesi){
         cout<<"address is: "<<hex<<address<<dec<<endl;
         cout << "State of Cache line is : "; 
@@ -95,30 +65,20 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
         else if(mesistate == MESIState::I) { cout << "I" << endl; }
     
     }
-    // ProcessMESIResult result;
-    // in shared state -> WRITE_HIT
-    // send INVALIDATE request to bus -> mesi just sends request of RDX(exclusive write)
-    //(go to other caches, check if that address present, if present then check the state of that cache line)
-    //cahnge state to M
+
+
     if(mesistate == MESIState::S){
         if(debug_mesi){cout << "Write hit in shared state" << endl; }
+
         Request request(BusTransaction::INVALIDATE, processorID, TransactionType::BUSRDX, address);
         bus.busTransactions++;
-        if(debug_mesi){
-            cout << "Adding request to bus queue" << endl; 
-            cout << "Request type: " << request.type << endl; 
-            cout << "Request address: " << hex << request.address << dec << endl;
-            cout << "Request processor ID: " << request.processorID << endl; 
-            cout << "Bus transaction type: " << request.transaction << endl; 
-        }
         bus.addToQueue(request);
         bus.haltProcessor(processorID);
         //updatecache inside processRDX
         return CACHE_HIT;
     }
 
-    // in Modified state -> WRITE_HIT
-    // change state to M
+    //just modify data
     else if(mesistate == MESIState::M){
         if(debug_mesi){cout << "Write hit in modified state" << endl; }
         cache.updateCacheState(address, mesistate); //debug try removing this readblock
@@ -140,13 +100,6 @@ ProcessMESIResult MESIProtocol::write(int processorID, unsigned int address, Bus
         if(debug_mesi){cout << "Write miss" << endl; }
         Request request(BusTransaction::RWITM, processorID, TransactionType::BUSRDX, address);
         bus.busTransactions++;
-        if(debug_mesi){
-            cout << "Adding request to bus queue" << endl; 
-            cout << "Request type: " << request.type << endl; 
-            cout << "Request address: " << hex << request.address << dec << endl;
-            cout << "Request processor ID: " << request.processorID << endl; 
-            cout << "Bus transaction type: " << request.transaction << endl; 
-        }
         bus.addToQueue(request);
         bus.haltProcessor(processorID);
         //updatecache inside processRDX

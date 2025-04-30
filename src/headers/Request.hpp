@@ -7,7 +7,6 @@ class Request {
     bool done = false;
     BusTransaction transaction;
     unsigned int processorID;
-    bool isToMemOrCache = true; // debug
     TransactionType type;
     unsigned int address;
     int counter = 0;
