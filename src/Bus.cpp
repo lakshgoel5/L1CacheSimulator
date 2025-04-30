@@ -26,6 +26,8 @@ int Bus::cycle(){
         currentRequest = &busQueue.front();
         busQueue.pop();
         processRequest(currentRequest);
+        currentRequest->counter = currentRequest->eviction + currentRequest->other_back + currentRequest->self_get;
+        currentRequest->totalCounter = currentRequest->counter;
     }
     // if(debug_bus){
     //     cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
@@ -88,16 +90,28 @@ int Bus::cycle(){
         //if halted, then jump
         else{
             int jump = currentRequest->counter;
+            //update processor cycles
             for(int i=0; i<processors.size(); i++){
                 if(processors[i]->isDone() == false){
-                    processors[i]->numOfCycles += jump; //+1 coz it was added in the for loop before starting cycle of bus
-                    processors[i]->IdleCycles += jump; //same reson
-                    //if you remove -1, you will get how many times all 4 processors are simultaneously halted
+                    if(!otherBack(i)){
+                        if(busQueue.front().counter <= busQueue.front().totalCounter - busQueue.front().other_back){
+                            processors[i]->numOfCycles += jump;
+                        }
+                        else{
+                            processors[i]->IdleCycles = busQueue.front().other_back - (busQueue.front().totalCounter - busQueue.front().counter);
+                            processors[i]->numOfCycles += busQueue.front().self_get + busQueue.front().eviction;
+                        }
+                    }
+                    else{
+                        processors[i]->IdleCycles += jump;
+                    }
                 }
             }
             currentRequest->counter = 0;
-
             this->processors[currentRequest->processorID]->halted = false;
+            processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
+            processors[currentRequest->processorID]->updateStateToFree();
+            currentRequest = nullptr;
             //print currentrequest->tobeuodatedstate
             // if(debug_bus){
             //     cout << "All processors are halted, so adding counter to" << jump << endl;
@@ -114,9 +128,6 @@ int Bus::cycle(){
             //         cout << "Current Request to be updated state: I" << endl;
             //     }
             // }
-            processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
-            processors[currentRequest->processorID]->updateStateToFree();
-            currentRequest = nullptr;
 
             return jump;
         }
@@ -137,177 +148,192 @@ void Bus::processRequest(Request* request) {
 void Bus::processRD(Request* request) {
     //first figure out if address is present in other caches or not, dpending on that, call cache update
     bool ispresent= false;
-    if(debug_bus){
-        cout << endl;
-        cout << "Inside ProcessRD function" << endl;
-    }
     int blocksize = processors[request->processorID]->getBlockSize();
-    // see other processors
     int is_present_id = -1;
+
+    // if(debug_bus){
+    //     cout << endl;
+    //     cout << "Inside ProcessRD function" << endl;
+    // }
+
+    // see other processors
     for(int i=0; i<processors.size(); i++){
-        if (i == request->processorID) {
-            continue; // Skip the current processor
-        }
+
+        if (i == request->processorID) {continue;}  // Skip the current processor
+
         MESIState state = processors[i]->getCacheState(request->address);
-        if(debug_bus){
-            cout << "Checking for data in Cache of Processor number " << i << endl;
-        }
+
+        // if(debug_bus){
+        //     cout << "Checking for data in Cache of Processor number " << i << endl;
+        // }
+
+
         if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
             if(is_present_id == -1){
                 is_present_id = i;
             }
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is";
-                if (state == MESIState::E) {
-                    cout << "E" << endl;
-                }
-                else if (state == MESIState::S) {
-                    cout << "S" << endl;
-                }
-                else if (state == MESIState::M)
-                    cout << "M" << endl;
-            }
+            // if(debug_bus){
+            //     cout << "Data present in other caches, so is_present is true and state is";
+            //     if (state == MESIState::E) {
+            //         cout << "E" << endl;
+            //     }
+            //     else if (state == MESIState::S) {
+            //         cout << "S" << endl;
+            //     }
+            //     else if (state == MESIState::M)
+            //         cout << "M" << endl;
+            // }
         }
+
+
+
         else if(state == MESIState::M){
             ispresent = true;
             if(is_present_id == -1){
                 is_present_id = i;
             }
             processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
+
             //copy back
             processors[i]->dataTraffic += blocksize; // block size same for all
-            request->counter += 100; // write back to memory of other cache
+            this->totalBusTraffic += blocksize;
+            request->other_back += 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is";
-                if (state == MESIState::E) {
-                    cout << "E" << endl;
-                }
-                else if (state == MESIState::S) {
-                    cout << "S" << endl;
-                }
-                else if (state == MESIState::M)
-                    cout << "M" << endl;
-                cout << "Due to M state, so copy back to memory. Request counter changed to " << request->counter << endl;
-            }
+            // if(debug_bus){
+            //     cout << "Data present in other caches, so is_present is true and state is";
+            //     if (state == MESIState::E) {
+            //         cout << "E" << endl;
+            //     }
+            //     else if (state == MESIState::S) {
+            //         cout << "S" << endl;
+            //     }
+            //     else if (state == MESIState::M)
+            //         cout << "M" << endl;
+            //     cout << "Due to M state, so copy back to memory. Request counter changed to " << request->counter << endl;
+            // }
         }
     }
-    //add cache line
-    //.......
+
     int add_line = processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
     if(add_line > 0){
+        request-> eviction += add_line;
         // M state block is evicted as LRU
         processors[request->processorID]->dataTraffic += blocksize;
-        request-> counter += add_line;
+        this->totalBusTraffic += blocksize;
     }
+
     if(ispresent == false){
-        // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
-        if(debug_bus){
-            cout << "request counter before updating is " << request->counter << endl;
-        }
-        request->counter += 100;
+        request->self_get += 100;
+
         processors[request->processorID]->dataTraffic += blocksize;
-        if(debug_bus){
-            cout << "request counter after updating is " << request->counter << endl;
-        }
+        this->totalBusTraffic += blocksize;
+
         currentRequest->toBeUpdatedState = MESIState::E;
-        if(debug_bus){
-            cout << "Data not present in other caches, so setting counter to " << request->counter << endl;
-        }
-        // left
+
+        if(debug_bus){cout << "Data not present in other caches, so setting self_get to " << request->counter<< endl;}
     }
     else{
-        // stalling will occur - 2*N cycles
-        //read from other cache
-        // left
-        // int n = 1<<(b-2); // debug
-        request->counter += blocksize/2;
+        request->self_get += blocksize/2;
+
         processors[request->processorID]->dataTraffic += blocksize;
-        processors[is_present_id]->dataTraffic += blocksize;
         this->totalBusTraffic += blocksize;
+        processors[is_present_id]->dataTraffic += blocksize;
+
         currentRequest->toBeUpdatedState = MESIState::S;
-        if(debug_bus){
-            cout << "Data present in other caches, so setting counter to " << request->counter << endl;
-        }
+
+        if(debug_bus){cout << "Data present in other caches, so setting counter to " << request->counter << endl;}
     }
 }
 // cache eviction of modified block - left
 // handling simultaneous reads/writes to the same memory address - left
 
 void Bus::processRDX(Request* request) {
-    if(debug_bus){
-        cout << endl;
-        cout << "Inside ProcessRDX function" << endl;
-    }
+    if(debug_bus){cout << endl;cout << "Inside ProcessRDX function" << endl;}
+
     int blocksize = processors[request->processorID]->getBlockSize();
     bool ispresent = false;
     int is_present_id = -1;
+
+    //go to each processor
     for(int i=0; i<processors.size(); i++){
-        if (i == request->processorID) {
-            continue; // Skip the current processor
-        }
+
+        if (i == request->processorID) {continue;}  // Skip the current processor
+
         MESIState state = processors[i]->getCacheState(request->address);
-        if(debug_bus){
-            cout << "Checking for data in Cache of Processor number " << i << endl;
-        }
+
+        if(debug_bus){cout << "Checking for data in Cache of Processor number " << i << endl;}
+
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
+
             if(is_present_id == -1){
                 is_present_id = i;
             }
+            
             //copy back
             processors[i]->dataTraffic += blocksize;
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is M " << endl;
-            }
-            request->counter += 100; // write back to memory of other cache
+            this->totalBusTraffic += blocksize;
+            request->other_back+= 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
+            // if(debug_bus){
+            //     cout << "Data present in other caches, so is_present is true and state is M " << endl;
+            // }
         }
+
+
         else if(state == MESIState::S || state == MESIState::E) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
             ispresent = true;
             if(is_present_id == -1){
                 is_present_id = i;
             }
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is";
-                if (state == MESIState::E) {
-                    cout << "E" << endl;
-                }
-                else if (state == MESIState::S) {
-                    cout << "S" << endl;
-                }
-                else if (state == MESIState::M){
-                    cout << "M" << endl;
-                }
-            }
+            // if(debug_bus){
+            //     cout << "Data present in other caches, so is_present is true and state is";
+            //     if (state == MESIState::E) {
+            //         cout << "E" << endl;
+            //     }
+            //     else if (state == MESIState::S) {
+            //         cout << "S" << endl;
+            //     }
+            //     else if (state == MESIState::M){
+            //         cout << "M" << endl;
+            //     }
+            // }
         }
     }
+
+
     int add_line = processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
     if(add_line > 0){
         // M state block is evicted as LRU
         processors[request->processorID]->dataTraffic += blocksize;
-        request-> counter += add_line;
+        this->totalBusTraffic += blocksize;
+        request->eviction += add_line;
     }
+
+
     currentRequest->toBeUpdatedState = MESIState::M;
+
     if(request->transaction == BusTransaction::INVALIDATE){
         //just send Invalidate and write on it
         processors[request->processorID]->numBusInvalidate++;
-        request->counter += 1;
+        request->self_get += 1;
     }
     else if(ispresent == false){
         //read from memory
-        request->counter += 100;
+        request->self_get += 100;
         processors[request->processorID]->dataTraffic += blocksize;
     }
     else{
         // int n = 1<<(b-2); // debug
-        request->counter += blocksize/2; //transfer
+        request->self_get += blocksize/2; //transfer
+
         processors[request->processorID]->numBusInvalidate++;
+        
         processors[request->processorID]->dataTraffic += blocksize;
         processors[is_present_id]->dataTraffic += blocksize;
         this->totalBusTraffic += blocksize;
@@ -336,4 +362,13 @@ long long Bus::getBusTraffic() {
         totalBusTraffic += processors[i]->dataTraffic;
     }
     return totalBusTraffic;
+}
+
+bool Bus::otherBack(int i){
+    if (!busQueue.empty()) {
+        if( busQueue.front().processorID == i){
+            return true;
+        }
+    }
+    return false;
 }

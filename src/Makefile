@@ -7,7 +7,7 @@ run2:
 	./L1simulate -t app2 -s 5 -E 2 -b 5 -o abcd.txt
 
 run3:
-	./L1simulate -t app3 -s 5 -E 2 -b 5 -o abcd.txt
+	./L1simulate -t app3 -s 4 -E 2 -b 5 -o abcd.txt
 
 run4:
 	./L1simulate -t app4 -s 5 -E 2 -b 5 -o abcd.txt

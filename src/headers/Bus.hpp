@@ -30,8 +30,6 @@ class Bus {
         void addToQueue(Request request);
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
-        void BusRead();
-        void BusWrite();
         void processRequest(Request* request);
         void processRD(Request* request);
         void processRDX(Request* request);
@@ -39,4 +37,5 @@ class Bus {
         bool isDone();
         void haltProcessor(int processorID);
         long long getBusTraffic();
+        bool otherBack(int i);
 };

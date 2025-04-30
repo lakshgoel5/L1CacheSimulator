@@ -112,9 +112,12 @@ int main(int argc, char* argv[]){
                 //Processor halted, so increment its cycles and idlecycles
                 else{
                     if(debug){cout << "Processor " << i << " is halted" << endl;}
-
-                    processorsInWork[i]->numOfCycles++;
-                    processorsInWork[i]->IdleCycles++;
+                    if(!bus.otherBack(i)){
+                        processorsInWork[i]->numOfCycles++;
+                    }
+                    else{
+                        processorsInWork[i]->IdleCycles++;
+                    }
                 }
             }
         }
@@ -145,6 +148,6 @@ int main(int argc, char* argv[]){
     }
     cout << "Overall Bus Summary:" << endl;
     cout << "Total Bus Transactions: " << bus.busTransactions << endl;
-    cout << "Total Bus Traffic (Bytes): " << bus.getBusTraffic() << endl;
+    cout << "Total Bus Traffic (Bytes): " << bus.totalBusTraffic << endl;
     return 0;
 }
