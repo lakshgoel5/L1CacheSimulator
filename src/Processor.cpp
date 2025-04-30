@@ -198,7 +198,7 @@ void Processor::PrintStats() {
     cout << "Cache Misses: " << numMiss << endl;
     cout << "Cache Miss Rate: " << getMissRate() <<"%"<< endl;
     cout << "Cache Evictions: " << numEvictions << endl;
-    cout << "Writebacks: " << numWriteBack << endl;
+    cout << "Writebacks: " << getNumWriteBack() << endl;
     cout << "Bus Invalidations: " << numBusInvalidate << endl;
     cout << "Data Traffic (Bytes): " << dataTraffic << endl;
 }

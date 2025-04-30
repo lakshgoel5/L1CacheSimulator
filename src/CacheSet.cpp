@@ -65,7 +65,7 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
             it->setState(state);
             it->setValid(true);
             it->setTag(tag);
-    
+            // this->numEvictions++;
             // Move this element to the front
             cachelines_data.splice(cachelines_data.begin(), cachelines_data, it);
             return 0;
@@ -81,6 +81,7 @@ int CacheSet::addCacheLine(uint32_t tag, MESIState state){
     cachelines_data.front().setState(state);
     cachelines_data.front().setValid(true);
     cachelines_data.front().setTag(tag);
+    this->numEvictions++;
     if(lrustate == MESIState::M){
         // Handle eviction of modified block
         // Write back to memory or other cache
