@@ -33,7 +33,6 @@ class CacheLines{ //CacheBlock
     void writeblock(vector<int8_t> data);
     int8_t readbyte(size_t offset);
     int readword(size_t offset);
-    vector<int8_t> readblock();
 
 
     void printCacheLine(); //debug

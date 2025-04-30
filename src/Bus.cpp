@@ -1,26 +1,12 @@
 #include "headers/Bus.hpp"
+#include <algorithm>
 
 bool debug_bus = false;
+
 
 Bus::Bus(int bandwidth){
     this->bandwidth = 4*bandwidth;
     this->currentRequest = nullptr;
-}
-
-void Bus::addProcessorToBus(Processor* processor) {
-    processors.push_back(processor);
-}
-
-void Bus::BusRead() {
-    // Implement the logic for bus read operation
-    // This function will be called when a processor wants to read data from the bus
-    // It should handle the data transfer and update the state of the processors accordingly
-}
-
-void Bus::BusWrite() {
-    // Implement the logic for bus write operation
-    // This function will be called when a processor wants to write data to the bus
-    // It should handle the data transfer and update the state of the processors accordingly
 }
 
 int Bus::cycle(){
@@ -40,61 +26,64 @@ int Bus::cycle(){
             }
         }
         currentRequest = &busQueue.front();
-        busQueue.pop();
         processRequest(currentRequest);
-    }
-    if(debug_bus){
-        cout << "Current Request Processor ID: " << currentRequest->processorID << endl;
-        cout << "Current Request transaction: ";
-        if(currentRequest->transaction == BusTransaction::MEMREAD) {
-            cout << "MEMREAD" << endl;
-        } else if(currentRequest->transaction == BusTransaction::RWITM) {
-            cout << "RWITM" << endl;
-        } else if(currentRequest->transaction == BusTransaction::INVALIDATE) {
-            cout << "INVALIDATE" << endl;
-        }
-        cout << "Address " << hex << currentRequest->address << dec << endl;
-        cout << "Current Request Counter: " << currentRequest->counter << endl;
+        currentRequest->counter = currentRequest->eviction + currentRequest->other_back + currentRequest->self_get;
+        currentRequest->totalCounter = currentRequest->counter;
     }
     if(currentRequest != nullptr){
         bool allHalted = true;
         for(int i=0; i<processors.size(); i++){
-            if(processors[i]->halted == false){
+            if(processors[i]->halted == false && processors[i]->isDone() == false){
                 allHalted = false;
                 break;
             }
         }
+
+        //if all are not halted, go cycle by cycle
         if(!allHalted){
+            //print queue
             currentRequest->counter--;
+
             if(currentRequest->counter == 0){
-                if(debug_bus){
-                    cout<< "DONE Current Request: " << currentRequest->transaction << " " << hex << currentRequest->address << dec << endl;
-                }
-                //update cache line
+                busQueue.pop();
                 this->processors[currentRequest->processorID]->halted = false;
                 processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
                 processors[currentRequest->processorID]->updateStateToFree();  // what if the last instruction is only left -> then has to be set to done
                 currentRequest = nullptr;
             }
+
             return 0;
         }
+
+
+
+        //if halted, then jump
         else{
             int jump = currentRequest->counter;
+            //update processor cycles
             for(int i=0; i<processors.size(); i++){
                 if(processors[i]->isDone() == false){
-                    processors[i]->numOfCycles += jump; //+1 coz it was added in the for loop before starting cycle of bus
-                    processors[i]->IdleCycles += jump; //same reson
-                    //if you remove -1, you will get how many times all 4 processors are simultaneously halted
+                    if(!otherBack(i)){
+                        if(busQueue.front().counter <= busQueue.front().totalCounter - busQueue.front().other_back){
+                            processors[i]->numOfCycles += jump;
+                        }
+                        else{
+                            processors[i]->IdleCycles = busQueue.front().other_back - (busQueue.front().totalCounter - busQueue.front().counter);
+                            processors[i]->numOfCycles += busQueue.front().self_get + busQueue.front().eviction;
+                        }
+                    }
+                    else{
+                        processors[i]->IdleCycles += jump;
+                    }
                 }
             }
-            if(debug_bus){
-                cout << "All processors are halted, so adding counter to" << jump << endl;
-            }
+            busQueue.pop();
             currentRequest->counter = 0;
             this->processors[currentRequest->processorID]->halted = false;
             processors[currentRequest->processorID]->updatecacheState(currentRequest->address, currentRequest->toBeUpdatedState);
             processors[currentRequest->processorID]->updateStateToFree();
             currentRequest = nullptr;
+
             return jump;
         }
     }
@@ -102,189 +91,158 @@ int Bus::cycle(){
 }
 
 void Bus::processRequest(Request* request) {
-    if(!request->isToMemOrCache){
-        return; //if the request is not to memory or cache, return
-    }
     if(request->type == TransactionType::BUSRD) {
-        if(debug_bus){
-            cout << "Processing Bus Read" << endl;
-        }
         processRD(request);
     } else if(request->type == TransactionType::BUSRDX) {
-        if(debug_bus){
-            cout << "Processing Bus RDX" << endl;
-        }
         processRDX(request);
     }
-    //go to each processor other than the processor passed in function
-    //go to their caches using processor->cache (point 10, snooping transactions still continue)
-    //check if the address is present in their cache(if cache not present, you get I -> do nothing as written below)
-    //if present(either M or E or S), check the state of that cache line
-
-    //if state is M, and transaction is RWITM, then set it to Invalid, along with copy back (Write_back, as well as share block to other caches so 2*n (less than 100), then other cache modifies it)
-    //(1)//if state is M, and transaction is MEMREAD, then set it to S, along with copy back (In this, write back, as well as share block to other caches so 2*n)(Why? coz 2*n less then 100 for original processor to read from mem)
-
-    //if state is S, then set it to Invalid(transaction should be invalidate) -> call write function
-    //if state S, and transaction is MEM_READ, then keep it to S -> call read function
-
-    //if state is E, and transaction is RWITM, then set it to Invalid
-    //(2)//if state is E, and transaction is MEMREAD, then set it to S
-
-    //if state is I, then do nothing
-
-    //for copy back, we have to set processor state to WRITE_MEMORY(Only if it is in free state and not doing an old read or write)(Now the question is have that prcessor executed it's present instruction or not)
-    //and then call bus write function in Processor.cpp only
-
-
-    //in case of MEM_READ or RWITM, set state to READ_MEMORY for current processor(already done by executeFree function in processor)
-
 }
 
 void Bus::processRD(Request* request) {
     //first figure out if address is present in other caches or not, dpending on that, call cache update
     bool ispresent= false;
-    if(debug_bus){
-        cout << endl;
-        cout << "Inside ProcessRD function" << endl;
-    }
+    int blocksize = processors[request->processorID]->getBlockSize();
+    int is_present_id = -1;
 
     // see other processors
-    for(int i=0; i<processors.size() && i!= request->processorID; i++){
+    for(int i=0; i<processors.size(); i++){
+
+        if (i == request->processorID) {continue;}  // Skip the current processor
+
         MESIState state = processors[i]->getCacheState(request->address);
-        if(debug_bus){
-            cout << "Checking for data in Cache of Processor number " << i << endl;
-        }
+
+
         if(state == MESIState::E || state == MESIState::S) {
             ispresent = true;
-            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
-            processors[i]->numBusInvalidate++;
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is";
-                if (state == MESIState::E) {
-                    cout << "E" << endl;
-                }
-                else if (state == MESIState::S) {
-                    cout << "S" << endl;
-                }
-                else if (state == MESIState::M)
-                    cout << "M" << endl;
+            if(is_present_id == -1){
+                is_present_id = i;
             }
+            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
         }
+
+
+
         else if(state == MESIState::M){
             ispresent = true;
-            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
-            processors[i]->numBusInvalidate++;
-            //copy back
-            request->counter += 100; // write back to memory of other cache
-            processors[i]->numWriteBack++;
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is";
-                if (state == MESIState::E) {
-                    cout << "E" << endl;
-                }
-                else if (state == MESIState::S) {
-                    cout << "S" << endl;
-                }
-                else if (state == MESIState::M)
-                    cout << "M" << endl;
-                cout << "Due to M state, so copy back to memory. Request counter changed to " << request->counter << endl;
+            if(is_present_id == -1){
+                is_present_id = i;
             }
+            processors[i]->updatecacheState(request->address, MESIState::S); //goes to shared state in case of MEM_READ signal, see assets
 
+            //copy back
+            processors[i]->dataTraffic += blocksize; // block size same for all
+            this->totalBusTraffic += blocksize;
+            request->other_back += 100; // write back to memory of other cache
+            processors[i]->numWriteBack++;
         }
     }
-    //add cache line
-    //.......
-    request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+
+    int add_line = processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+    if(add_line > 0){
+        request-> eviction += add_line;
+        // M state block is evicted as LRU
+        processors[request->processorID]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
+    }
+
     if(ispresent == false){
-        // this goes to cycle processors[request.processorID]->updatecacheState(request.address, MESIState::E); //goes to exclusive //goes to exclusive
         //read from memory
-        if(debug_bus){
-            cout << "request counter before updating is " << request->counter << endl;
-        }
-        request->counter += 100;
-        if(debug_bus){
-            cout << "request counter after updating is " << request->counter << endl;
-        }
+        request->self_get += 100;
+
+        processors[request->processorID]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
+
         currentRequest->toBeUpdatedState = MESIState::E;
-        if(debug_bus){
-            cout << "Data not present in other caches, so setting counter to " << request->counter << endl;
-        }
-        // left
+
+        if(debug_bus){cout << "Data not present in other caches, so setting self_get to " << request->counter<< endl;}
     }
     else{
-        // stalling will occur - 2*N cycles
-        //read from other cache
-        // left
-        int blocksize = processors[request->processorID]->getBlockSize();
-        // int n = 1<<(b-2); // debug
-        request->counter += blocksize/2;
-        processors[request->processorID]->dataTraffic += blocksize/2;
-        // this->totalBusTraffic += ;
+        request->self_get += blocksize/2;
+
+        processors[request->processorID]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
+        processors[is_present_id]->dataTraffic += blocksize;
+
         currentRequest->toBeUpdatedState = MESIState::S;
-        if(debug_bus){
-            cout << "Data present in other caches, so setting counter to " << request->counter << endl;
-        }
+
+        if(debug_bus){cout << "Data present in other caches, so setting counter to " << request->counter << endl;}
     }
 }
 // cache eviction of modified block - left
 // handling simultaneous reads/writes to the same memory address - left
 
 void Bus::processRDX(Request* request) {
-    if(debug_bus){
-        cout << endl;
-        cout << "Inside ProcessRDX function" << endl;
-    }
+    if(debug_bus){cout << endl;cout << "Inside ProcessRDX function" << endl;}
+
+    int blocksize = processors[request->processorID]->getBlockSize();
     bool ispresent = false;
-    for(int i=0; i<processors.size() && i!=request->processorID; i++){
+    int is_present_id = -1;
+
+    //go to each processor
+    for(int i=0; i<processors.size(); i++){
+
+        if (i == request->processorID) {continue;}  // Skip the current processor
+
         MESIState state = processors[i]->getCacheState(request->address);
-        if(debug_bus){
-            cout << "Checking for data in Cache of Processor number " << i << endl;
-        }
+
+        if(debug_bus){cout << "Checking for data in Cache of Processor number " << i << endl;}
+
         if(state == MESIState::M) { //debug uodatecachestate or invaidate it to remove it? i.e make it invalid
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            processors[i]->numBusInvalidate++;
             ispresent = true;
-            //copy back
-            if(debug_bus){
-                cout << "Data present in other caches, so is_present is true and state is M aaaaa" << endl;
+
+            if(is_present_id == -1){
+                is_present_id = i;
             }
-            request->counter += 100; // write back to memory of other cache
+            
+            //copy back
+            processors[i]->dataTraffic += blocksize;
+            this->totalBusTraffic += blocksize;
+            request->other_back+= 100; // write back to memory of other cache
             processors[i]->numWriteBack++;
         }
+
+
         else if(state == MESIState::S || state == MESIState::E) {
             processors[i]->updatecacheState(request->address, MESIState::I); //goes to invalid state in case of RWITM or INVALIDATE signal
-            processors[i]->numBusInvalidate++;
             ispresent = true;
-        }
-        if(debug_bus){
-            cout << "Data present in other caches, so is_present is true and state is";
-            if (state == MESIState::E) {
-                cout << "E" << endl;
-            }
-            else if (state == MESIState::S) {
-                cout << "S" << endl;
-            }
-            else if (state == MESIState::M){
-                cout << "M" << endl;
+            if(is_present_id == -1){
+                is_present_id = i;
             }
         }
     }
-    request->counter += processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+
+
+    int add_line = processors[request->processorID]->addCacheLine(request->address, MESIState::I); //initially sending I state
+    if(add_line > 0){
+        // M state block is evicted as LRU
+        processors[request->processorID]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
+        request->eviction += add_line;
+    }
+
+
     currentRequest->toBeUpdatedState = MESIState::M;
+
     if(request->transaction == BusTransaction::INVALIDATE){
         //just send Invalidate and write on it
-        request->counter += 1;
+        processors[request->processorID]->numBusInvalidate++;
+        request->self_get += 1;
     }
     else if(ispresent == false){
         //read from memory
-        request->counter += 100;
+        request->self_get += 100;
+        processors[request->processorID]->dataTraffic += blocksize;
     }
     else{
-        int b = processors[request->processorID]->getBlockSize();
-        int n = 1<<(b-2); // debug
-        request->counter += 2*n; //transfer
-        processors[request->processorID]->dataTraffic += 2*n;
-        this->totalBusTraffic += n;
+        // int n = 1<<(b-2); // debug
+        request->self_get += blocksize/2; //transfer
+
+        processors[request->processorID]->numBusInvalidate++;
+        
+        processors[request->processorID]->dataTraffic += blocksize;
+        processors[is_present_id]->dataTraffic += blocksize;
+        this->totalBusTraffic += blocksize;
     }
 }
 
@@ -298,4 +256,35 @@ bool Bus::isDone() {
 
 void Bus::haltProcessor(int processorID){
     this->processors[processorID]->halted = true;
+}
+
+void Bus::addProcessorToBus(Processor* processor) {
+    processors.push_back(processor);
+}
+
+long long Bus::getBusTraffic() {
+    totalBusTraffic = 0;
+    for(int i=0; i<processors.size(); i++){
+        totalBusTraffic += processors[i]->dataTraffic;
+    }
+    return totalBusTraffic;
+}
+
+long long Bus::maxExecutionTime() {
+    long long maxTime = 0;
+    for(int i=0; i<processors.size(); i++){
+        if(processors[i]->numOfCycles > maxTime){
+            maxTime = std::max(maxTime, static_cast<long long>(processors[i]->numOfCycles));
+        }
+    }
+    return maxTime;
+}
+bool Bus::otherBack(int i){
+    if(busQueue.empty()){
+        return false;
+    }
+    if( busQueue.front().processorID == i){
+        return false;
+    }
+    return true;
 }

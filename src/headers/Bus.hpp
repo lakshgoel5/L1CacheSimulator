@@ -20,23 +20,23 @@ class Request; // Forward declaration
 class Bus {
     private:
         vector<Processor*> processors;
-        queue<Request> busQueue;
         int bandwidth;
         Request* currentRequest;
 
     public:
-        int busTransactions = 0;
-        int totalBusTraffic = 0;
+        long long busTransactions = 0;
+        long long totalBusTraffic = 0; // sum of all data traffic
         void addToQueue(Request request);
         Bus(int bandwidth);
         void addProcessorToBus(Processor* processor);
-        void BusRead();
-        void BusWrite();
         void processRequest(Request* request);
         void processRD(Request* request);
         void processRDX(Request* request);
         int cycle();
         bool isDone();
         void haltProcessor(int processorID);
-
+        long long getBusTraffic();
+        long long maxExecutionTime();
+        bool otherBack(int i);
+        queue<Request> busQueue;
 };

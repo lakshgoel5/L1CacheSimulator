@@ -29,7 +29,7 @@ class Processor {
         int numEvictions = 0;
         int numWriteBack = 0;
         int numBusInvalidate = 0;
-        int dataTraffic = 0;
+        long long dataTraffic = 0;
         Processor(int processorID, size_t numSets, size_t numLines, size_t blockSize, string traceFile, Bus* bus);
         void cycle();
         void execute();
@@ -51,5 +51,11 @@ class Processor {
                 this->state = ProcessorState::FREE;
                 this->instructionIndex++;
             }
+        }
+        void printCache() {
+            cache.printCacheMESIStates();
+        }
+        long getNumWriteBack() {
+            return this->numWriteBack + this->cache.getnumWriteBack();
         }
 };

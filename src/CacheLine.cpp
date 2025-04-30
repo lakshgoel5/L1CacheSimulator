@@ -65,10 +65,6 @@ void CacheLines::writeblock(vector<int8_t> data){
     this->data = data;
 }
 
-vector<int8_t> CacheLines::readblock(){
-    return data;
-}
-
 void CacheLines::printCacheLine(){ //debug
     cout << "Cache Line State: " << state << endl;
     cout << "Tag: " << tag << endl;
