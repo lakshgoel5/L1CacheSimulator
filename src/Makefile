@@ -29,3 +29,15 @@ our1:
 
 our2:
 	./L1simulate -t our2 -s 2 -E 2 -b 5 -o abcd.txt
+
+false1:
+	./L1simulate -t false1 -s 5 -E 1 -b 5 -o abcd.txt
+
+false1c:
+	./L1simulate -t false1 -s 5 -E 1 -b 3 -o abcd.txt
+
+false2:
+	./L1simulate -t false2 -s 5 -E 1 -b 5 -o abcd.txt
+
+false2c:
+	./L1simulate -t false2 -s 5 -E 1 -b 3 -o abcd.txt
