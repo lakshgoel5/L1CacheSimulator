@@ -61,7 +61,7 @@ L1-Cache-Simulator/
 ## Building Project
 ### 1. Clone the repository and navigate to the project directory:
 ```bash
-git clone https://github.com/lakshgoel5/L1-Cache-Simulator-COL216
+git clone https://github.com/lakshgoel5/L1CacheSimulator
 cd L1-Cache-Simulator-COL216
 ```
 ### 2. Compiling the Project
